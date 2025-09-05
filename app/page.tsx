@@ -1,103 +1,128 @@
-import Image from "next/image";
+'use client'
+
+import { useState, useEffect } from 'react'
+import { gsap } from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import ThreeBackground from '@/components/ThreeBackground'
+import Header from '@/components/Header'
+import ContentSection from '@/components/ContentSection'
+import ServicesModal from '@/components/ServicesModal'
+import ContactForm from '@/components/ContactForm'
+
+gsap.registerPlugin(ScrollTrigger)
+
+interface Project {
+  id: string
+  title: string
+  description: string
+  layer: string
+  layerName: string
+  content: string
+  featured: boolean
+  order: number
+}
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [servicesModalOpen, setServicesModalOpen] = useState(false)
+  const [projects, setProjects] = useState<Project[]>([])
+  const [loading, setLoading] = useState(true)
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await fetch('/api/projects')
+        const data = await response.json()
+        setProjects(data.filter((project: Project) => project.featured))
+      } catch (error) {
+        console.error('Failed to fetch projects:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchProjects()
+    
+    // Add GSAP animations for content sections
+    const sections = ['#hero', '#seen', '#summon', '#hearthshire', '#contact']
+    sections.forEach((selector) => {
+      const box = document.querySelector(selector + ' .content-box')
+      if (box) {
+        gsap.to(box, {
+          opacity: 1,
+          scrollTrigger: {
+            trigger: selector,
+            start: 'top center',
+            end: 'bottom center',
+            toggleActions: 'play reverse play reverse'
+          }
+        })
+      }
+    })
+  }, [])
+
+  const getLayerColor = (layer: string) => {
+    switch (layer) {
+      case 'LAYER 1': return 'text-blue-400'
+      case 'LAYER 2': return 'text-purple-400'
+      case 'LAYER 3': return 'text-red-400'
+      default: return 'text-gray-400'
+    }
+  }
+
+  return (
+    <>
+      <ThreeBackground />
+      <Header onServicesClick={() => setServicesModalOpen(true)} />
+      
+      <main>
+        {/* Hero Section */}
+        <ContentSection id="hero">
+          <h1 className="text-5xl md:text-8xl font-black tracking-tighter mb-4">Engineering</h1>
+          <h2 className="text-5xl md:text-8xl font-black tracking-tighter section-title-gradient mb-8">from First Principles.</h2>
+          <p className="max-w-3xl mx-auto text-lg md:text-xl text-gray-400">
+            Scroll to begin a journey through my stack — from the foundational logic of a systems language to the vibrant pixels of a game engine.
+          </p>
+        </ContentSection>
+        
+        {/* Dynamic Project Sections */}
+        {loading ? (
+          <ContentSection id="loading">
+            <div className="text-gray-400">Loading projects...</div>
+          </ContentSection>
+        ) : (
+          projects.map((project) => (
+            <ContentSection key={project.id} id={project.id.replace('-project', '')}>
+              <h3 className={`text-sm font-semibold mb-2 tracking-widest ${getLayerColor(project.layer)}`}>
+                {project.layer}: {project.layerName}
+              </h3>
+              <h4 className="text-5xl md:text-7xl font-bold mb-4">{project.title}</h4>
+              <p className="text-gray-400 text-lg max-w-2xl mx-auto">{project.description}</p>
+            </ContentSection>
+          ))
+        )}
+        
+        {/* Contact Section */}
+        <ContentSection id="contact">
+          <h2 className="text-5xl md:text-8xl font-black tracking-tighter mb-4">Let's Build.</h2>
+          <p className="max-w-2xl mx-auto text-lg md:text-xl text-gray-400 mb-10">
+            If you're working on revolutionary products, I'd love to talk.
+          </p>
+          <a 
+            href="mailto:yousef.baitalmal.dev@email.com" 
+            className="btn-primary text-white px-10 py-5 rounded-lg font-semibold text-xl transition-all transform hover:scale-105 inline-block mb-8"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
+            yousef.baitalmal.dev@email.com
           </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
+          
+          {/* Contact Form */}
+          <ContactForm />
+        </ContentSection>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+      
+      <ServicesModal 
+        isOpen={servicesModalOpen} 
+        onClose={() => setServicesModalOpen(false)} 
+      />
+    </>
+  )
 }
