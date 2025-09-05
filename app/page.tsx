@@ -41,24 +41,45 @@ export default function Home() {
     }
 
     fetchProjects()
-    
-    // Add GSAP animations for content sections
-    const sections = ['#hero', '#seen', '#summon', '#hearthshire', '#contact']
-    sections.forEach((selector) => {
-      const box = document.querySelector(selector + ' .content-box')
-      if (box) {
-        gsap.to(box, {
-          opacity: 1,
-          scrollTrigger: {
-            trigger: selector,
-            start: 'top center',
-            end: 'bottom center',
-            toggleActions: 'play reverse play reverse'
-          }
-        })
-      }
-    })
   }, [])
+
+  // Set up GSAP animations after projects load
+  useEffect(() => {
+    if (!loading && projects.length > 0) {
+      // Animate hero and contact sections
+      ['#hero', '#contact'].forEach((selector) => {
+        const box = document.querySelector(selector + ' .content-box')
+        if (box) {
+          gsap.to(box, {
+            opacity: 1,
+            scrollTrigger: {
+              trigger: selector,
+              start: 'top center',
+              end: 'bottom center',
+              toggleActions: 'play reverse play reverse'
+            }
+          })
+        }
+      })
+      
+      // Animate project sections
+      projects.forEach((project) => {
+        const selector = '#' + project.id.replace('-project', '')
+        const box = document.querySelector(selector + ' .content-box')
+        if (box) {
+          gsap.to(box, {
+            opacity: 1,
+            scrollTrigger: {
+              trigger: selector,
+              start: 'top center',
+              end: 'bottom center',
+              toggleActions: 'play reverse play reverse'
+            }
+          })
+        }
+      })
+    }
+  }, [loading, projects])
 
   const getLayerColor = (layer: string) => {
     switch (layer) {

@@ -1,1 +1,107 @@
-'use client'\n\nimport { useState, useEffect } from 'react'\nimport Link from 'next/link'\nimport { format } from 'date-fns'\n\ninterface BlogPost {\n  id: string\n  title: string\n  content: string\n  excerpt: string\n  published: boolean\n  featured: boolean\n  slug: string\n  createdAt: string\n  updatedAt: string\n}\n\nexport default function BlogPage() {\n  const [posts, setPosts] = useState<BlogPost[]>([])\n  const [loading, setLoading] = useState(true)\n  const [error, setError] = useState('')\n\n  useEffect(() => {\n    const fetchPosts = async () => {\n      try {\n        const response = await fetch('/api/blog')\n        const data = await response.json()\n        setPosts(data.filter((post: BlogPost) => post.published))\n      } catch (error) {\n        setError('Failed to fetch blog posts')\n      } finally {\n        setLoading(false)\n      }\n    }\n\n    fetchPosts()\n  }, [])\n\n  if (loading) {\n    return (\n      <div className=\"min-h-screen bg-black text-white flex items-center justify-center\">\n        <div className=\"text-gray-400\">Loading blog posts...</div>\n      </div>\n    )\n  }\n\n  if (error) {\n    return (\n      <div className=\"min-h-screen bg-black text-white flex items-center justify-center\">\n        <div className=\"text-red-400\">{error}</div>\n      </div>\n    )\n  }\n\n  return (\n    <div className=\"min-h-screen bg-black text-white\">\n      <div className=\"container mx-auto px-4 py-16\">\n        <div className=\"max-w-4xl mx-auto\">\n          <div className=\"mb-12\">\n            <Link href=\"/\" className=\"text-gray-400 hover:text-white transition-colors mb-4 inline-block\">\n              ← Back to Portfolio\n            </Link>\n            <h1 className=\"text-5xl md:text-6xl font-black tracking-tighter mb-4\">Blog</h1>\n            <p className=\"text-xl text-gray-400\">\n              Thoughts on engineering, systems design, and building from first principles.\n            </p>\n          </div>\n\n          {posts.length === 0 ? (\n            <div className=\"text-center text-gray-400 py-16\">\n              <p className=\"text-xl\">No blog posts published yet.</p>\n              <p className=\"mt-4\">Check back soon for insights on systems engineering and creative coding.</p>\n            </div>\n          ) : (\n            <div className=\"space-y-8\">\n              {posts.map((post) => (\n                <article key={post.id} className=\"bg-gray-900/50 p-8 rounded-lg border border-white/10\">\n                  <div className=\"mb-4\">\n                    <h2 className=\"text-3xl font-bold mb-2\">\n                      <Link \n                        href={`/blog/${post.slug}`} \n                        className=\"hover:text-gray-300 transition-colors\"\n                      >\n                        {post.title}\n                      </Link>\n                    </h2>\n                    <div className=\"text-sm text-gray-400\">\n                      {format(new Date(post.createdAt), 'MMMM d, yyyy')}\n                    </div>\n                  </div>\n                  <p className=\"text-gray-300 text-lg mb-4\">{post.excerpt}</p>\n                  <Link \n                    href={`/blog/${post.slug}`}\n                    className=\"text-blue-400 hover:text-blue-300 transition-colors font-semibold\"\n                  >\n                    Read more →\n                  </Link>\n                </article>\n              ))}\n            </div>\n          )}\n        </div>\n      </div>\n    </div>\n  )\n}"
+'use client'
+
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { format } from 'date-fns'
+
+interface BlogPost {
+  id: string
+  title: string
+  content: string
+  excerpt: string
+  published: boolean
+  featured: boolean
+  slug: string
+  createdAt: string
+  updatedAt: string
+}
+
+export default function BlogPage() {
+  const [posts, setPosts] = useState<BlogPost[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        const response = await fetch('/api/blog')
+        const data = await response.json()
+        setPosts(data.filter((post: BlogPost) => post.published))
+      } catch (error) {
+        setError('Failed to fetch blog posts')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchPosts()
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-gray-400">Loading blog posts...</div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-red-400">{error}</div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-black text-white">
+      <div className="container mx-auto px-4 py-16">
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-12">
+            <Link href="/" className="text-gray-400 hover:text-white transition-colors mb-4 inline-block">
+              ← Back to Portfolio
+            </Link>
+            <h1 className="text-5xl md:text-6xl font-black tracking-tighter mb-4">Blog</h1>
+            <p className="text-xl text-gray-400">
+              Thoughts on engineering, systems design, and building from first principles.
+            </p>
+          </div>
+
+          {posts.length === 0 ? (
+            <div className="text-center text-gray-400 py-16">
+              <p className="text-xl">No blog posts published yet.</p>
+              <p className="mt-4">Check back soon for insights on systems engineering and creative coding.</p>
+            </div>
+          ) : (
+            <div className="space-y-8">
+              {posts.map((post) => (
+                <article key={post.id} className="bg-gray-900/50 p-8 rounded-lg border border-white/10">
+                  <div className="mb-4">
+                    <h2 className="text-3xl font-bold mb-2">
+                      <Link 
+                        href={`/blog/${post.slug}`} 
+                        className="hover:text-gray-300 transition-colors"
+                      >
+                        {post.title}
+                      </Link>
+                    </h2>
+                    <div className="text-sm text-gray-400">
+                      {format(new Date(post.createdAt), 'MMMM d, yyyy')}
+                    </div>
+                  </div>
+                  <p className="text-gray-300 text-lg mb-4">{post.excerpt}</p>
+                  <Link 
+                    href={`/blog/${post.slug}`}
+                    className="text-blue-400 hover:text-blue-300 transition-colors font-semibold"
+                  >
+                    Read more →
+                  </Link>
+                </article>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
