@@ -349,7 +349,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## 📧 Contact
 
 **Yousef Baitalmal**  
-[yousef.baitalmal.dev@email.com](mailto:yousef.baitalmal.dev@email.com)
+Visit the [portfolio website](https://github.com/yousefs-portfolio/portfolio) and use the contact form to get in touch.
 
 Project Link: [https://github.com/yousefs-portfolio/portfolio](https://github.com/yousefs-portfolio/portfolio)
 
