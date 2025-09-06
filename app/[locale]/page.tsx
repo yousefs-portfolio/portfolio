@@ -30,8 +30,9 @@ export default function Home() {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const response = await fetch('/api/projects')
-        const data = await response.json()
+        const response = await fetch('/api/projects', { cache: 'no-store' })
+        if (!response.ok) throw new Error(`HTTP ${response.status}`)
+        const data: Project[] = await response.json()
         setProjects(data.filter((project: Project) => project.featured))
       } catch (error) {
         console.error('Failed to fetch projects:', error)
@@ -124,9 +125,9 @@ export default function Home() {
         
         {/* Contact Section */}
         <ContentSection id="contact">
-          <h2 className="text-5xl md:text-8xl font-black tracking-tighter mb-4">Let's Build.</h2>
+          <h2 className="text-5xl md:text-8xl font-black tracking-tighter mb-4">Let&apos;s Build.</h2>
           <p className="max-w-2xl mx-auto text-lg md:text-xl text-gray-400 mb-10">
-            If you're working on revolutionary products, I'd love to talk.
+            If you&apos;re working on revolutionary products, I&apos;d love to talk.
           </p>
           <a 
             href="mailto:yousef.baitalmal.dev@email.com" 

@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     })
 
     return NextResponse.json({ success: true, contact }, { status: 201 })
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to submit contact form' }, { status: 500 })
   }
 }
@@ -35,7 +35,7 @@ export async function GET() {
       orderBy: { createdAt: 'desc' }
     })
     return NextResponse.json(contacts)
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to fetch contacts' }, { status: 500 })
   }
 }

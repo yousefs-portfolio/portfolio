@@ -116,8 +116,8 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   
   const t = (key: string): string => {
     // Return English by default during SSR
-    if (!mounted) return (translations['en'] as any)[key] || key
-    return (translations[language] as any)[key] || key
+    const dict: Record<string, string> = mounted ? translations[language] : translations['en']
+    return dict[key] ?? key
   }
   
   const value = {

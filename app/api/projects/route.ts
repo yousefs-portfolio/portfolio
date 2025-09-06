@@ -1,77 +1,68 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { NextResponse } from 'next/server'
+import config from '../../../keystatic.config'
 
+export const runtime = 'nodejs'
+
+// Keystatic reader is only available server-side
+// We import dynamically to avoid issues in edge-like environments
 export async function GET() {
   try {
-    const projects = await prisma.project.findMany({
-      orderBy: { order: 'asc' }
-    })
-    
-    // Parse JSON strings back to arrays for client
-    const parsedProjects = projects.map(project => {
-      let tech = []
-      let techAr = []
-      
-      try {
-        if (project.tech && project.tech !== '') {
-          tech = typeof project.tech === 'string' ? JSON.parse(project.tech) : project.tech
-        }
-      } catch (e) {
-        console.error('Failed to parse tech:', e)
-        tech = []
-      }
-      
-      try {
-        if (project.techAr && project.techAr !== '') {
-          techAr = typeof project.techAr === 'string' ? JSON.parse(project.techAr) : project.techAr
-        }
-      } catch (e) {
-        console.error('Failed to parse techAr:', e)
-        techAr = []
-      }
-      
-      return {
-        ...project,
-        tech,
-        techAr
-      }
-    })
-    
-    return NextResponse.json(parsedProjects)
-  } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch projects' }, { status: 500 })
-  }
-}
+    const mod = await import('@keystatic/core/reader')
+    type ProjectItem = { slug: string; entry: Record<string, unknown> }
+    const { createReader }: { createReader: (cwd: string, cfg: unknown) => { collections: { projects: { all: () => Promise<ProjectItem[]> } } } } = mod as unknown as {
+      createReader: (cwd: string, cfg: unknown) => { collections: { projects: { all: () => Promise<ProjectItem[]> } } }
+    }
 
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json()
-    
-    // Convert arrays to JSON strings for SQLite storage
-    const projectData = {
-      ...body,
-      tech: Array.isArray(body.tech) ? JSON.stringify(body.tech) : '[]',
-      techAr: Array.isArray(body.techAr) ? JSON.stringify(body.techAr) : '[]',
-      titleAr: body.titleAr || '',
-      descriptionAr: body.descriptionAr || '',
-      contentAr: body.contentAr || '',
-      layerNameAr: body.layerNameAr || ''
+    const reader = createReader(process.cwd(), config)
+
+    const items = await reader.collections.projects.all()
+
+    type ProjectEntry = {
+      title?: string | { name?: string }
+      description?: string
+      layer?: string
+      layerName?: string
+      featured?: boolean
+      order?: number
     }
-    
-    const project = await prisma.project.create({
-      data: projectData
-    })
-    
-    // Parse JSON strings back to arrays for response
-    const parsedProject = {
-      ...project,
-      tech: project.tech ? JSON.parse(project.tech) : [],
-      techAr: project.techAr ? JSON.parse(project.techAr) : []
+
+    type ProjectDto = {
+      id: string
+      title: string
+      description: string
+      layer: string
+      layerName: string
+      content: string
+      featured: boolean
+      order: number
     }
-    
-    return NextResponse.json(parsedProject, { status: 201 })
+
+    const projects: ProjectDto[] = (items as ProjectItem[])
+      .map((item) => {
+        const e = (item.entry || {}) as ProjectEntry
+        const rawTitle = typeof e.title === 'string' ? e.title : e.title?.name
+        const title = rawTitle ?? item.slug
+        const description = typeof e.description === 'string' ? e.description : ''
+        const layer = e.layer ?? 'LAYER 1'
+        const layerName = e.layerName ?? ''
+        const featured = Boolean(e.featured ?? true)
+        const order = Number(e.order ?? 0)
+        return {
+          id: `${item.slug}-project`,
+          title,
+          description,
+          layer,
+          layerName,
+          content: '',
+          featured,
+          order,
+        }
+      })
+      .sort((a, b) => a.order - b.order)
+
+    return NextResponse.json(projects, { status: 200 })
   } catch (error) {
-    console.error('Failed to create project:', error)
-    return NextResponse.json({ error: 'Failed to create project' }, { status: 500 })
+    console.error('Error reading projects from Keystatic:', error)
+    return NextResponse.json({ error: 'Failed to load projects' }, { status: 500 })
   }
 }

@@ -24,7 +24,7 @@ interface Project {
 }
 
 export default function Home() {
-  const { t, language } = useLanguage()
+  const { t } = useLanguage()
   const [servicesModalOpen, setServicesModalOpen] = useState(false)
   const [projects, setProjects] = useState<Project[]>([])
   const [loading, setLoading] = useState(true)
@@ -32,8 +32,9 @@ export default function Home() {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const response = await fetch('/api/projects')
-        const data = await response.json()
+        const response = await fetch('/api/projects', { cache: 'no-store' })
+        if (!response.ok) throw new Error(`HTTP ${response.status}`)
+        const data: Project[] = await response.json()
         setProjects(data.filter((project: Project) => project.featured))
       } catch (error) {
         console.error('Failed to fetch projects:', error)

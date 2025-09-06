@@ -27,7 +27,7 @@ export default function BlogPage() {
         const response = await fetch('/api/blog')
         const data = await response.json()
         setPosts(data.filter((post: BlogPost) => post.published))
-      } catch (error) {
+      } catch {
         setError('Failed to fetch blog posts')
       } finally {
         setLoading(false)

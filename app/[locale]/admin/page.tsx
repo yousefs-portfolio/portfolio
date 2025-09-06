@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 interface Project {
   id: string
@@ -65,7 +65,7 @@ export default function AdminPage() {
       setProjects(await projectsRes.json())
       setServices(await servicesRes.json())
       setContacts(await contactsRes.json())
-    } catch (error) {
+    } catch {
       setError('Failed to fetch data')
     } finally {
       setLoading(false)
@@ -77,7 +77,7 @@ export default function AdminPage() {
       try {
         await fetch(`/api/projects/${id}`, { method: 'DELETE' })
         setProjects(prev => prev.filter(p => p.id !== id))
-      } catch (error) {
+      } catch {
         setError('Failed to delete project')
       }
     }
@@ -88,7 +88,7 @@ export default function AdminPage() {
       try {
         await fetch(`/api/services/${id}`, { method: 'DELETE' })
         setServices(prev => prev.filter(s => s.id !== id))
-      } catch (error) {
+      } catch {
         setError('Failed to delete service')
       }
     }

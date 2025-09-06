@@ -22,8 +22,9 @@ export default function ServicesModal({ isOpen, onClose }: ServicesModalProps) {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const response = await fetch('/api/services')
-        const data = await response.json()
+        const response = await fetch('/api/services', { cache: 'no-store' })
+        if (!response.ok) throw new Error(`HTTP ${response.status}`)
+        const data: Service[] = await response.json()
         setServices(data.filter((service: Service) => service.featured))
       } catch (error) {
         console.error('Failed to fetch services:', error)

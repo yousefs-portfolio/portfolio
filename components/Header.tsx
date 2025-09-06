@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { useLanguage } from '@/contexts/LanguageContext'
 import LanguageToggle from './LanguageToggle'
 
@@ -24,9 +25,9 @@ export default function Header({ onServicesClick }: HeaderProps) {
   if (!mounted) {
     return (
       <header className="fixed top-0 left-0 right-0 z-50 p-6 flex justify-between items-center">
-        <a href="/" className="text-xl font-bold tracking-tighter">YOUSEF BAITALMAL</a>
+        <Link href="/" className="text-xl font-bold tracking-tighter">YOUSEF BAITALMAL</Link>
         <nav className="hidden md:flex items-center space-x-8">
-          <a href="/blog" className="hover:text-white transition-colors">{t('nav.blog')}</a>
+          <Link href="/blog" className="hover:text-white transition-colors">{t('nav.blog')}</Link>
           <button className="hover:text-white transition-colors">{t('nav.services')}</button>
           <a href="#contact" className="hover:text-white transition-colors">{t('nav.contact')}</a>
           <LanguageToggle />
@@ -40,9 +41,9 @@ export default function Header({ onServicesClick }: HeaderProps) {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 p-6 flex justify-between items-center">
-      <a href="/" className="text-xl font-bold tracking-tighter">YOUSEF BAITALMAL</a>
+      <Link href="/" className="text-xl font-bold tracking-tighter">YOUSEF BAITALMAL</Link>
       <nav className="hidden md:flex items-center space-x-8">
-        <a href="/blog" className="hover:text-white transition-colors">{t('nav.blog')}</a>
+        <Link href="/blog" className="hover:text-white transition-colors">{t('nav.blog')}</Link>
         <button id="services-btn" onClick={onServicesClick} className="hover:text-white transition-colors">{t('nav.services')}</button>
         <a href="#contact" onClick={scrollToContact} className="hover:text-white transition-colors">{t('nav.contact')}</a>
         <LanguageToggle />
