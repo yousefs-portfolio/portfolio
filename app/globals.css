@@ -1,10 +1,181 @@
 @import "tailwindcss";
 
+@theme {
+    --font-family-comfortaa: "Comfortaa", sans-serif;
+    --font-family-almarai: "Almarai", sans-serif;
+}
+
+/* Font Classes */
+.font-comfortaa {
+    font-family: "Comfortaa", sans-serif;
+    font-optical-sizing: auto;
+}
+
+.font-almarai {
+    font-family: "Almarai", sans-serif;
+}
+
+/* Comfortaa weight utilities */
+.comfortaa-light {
+    font-family: "Comfortaa", sans-serif;
+    font-weight: 300;
+}
+
+.comfortaa-regular {
+    font-family: "Comfortaa", sans-serif;
+    font-weight: 400;
+}
+
+.comfortaa-medium {
+    font-family: "Comfortaa", sans-serif;
+    font-weight: 500;
+}
+
+.comfortaa-semibold {
+    font-family: "Comfortaa", sans-serif;
+    font-weight: 600;
+}
+
+.comfortaa-bold {
+    font-family: "Comfortaa", sans-serif;
+    font-weight: 700;
+}
+
+.almarai-light {
+    font-family: "Almarai", sans-serif;
+    font-weight: 300;
+    font-style: normal;
+}
+
+.almarai-regular {
+    font-family: "Almarai", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+}
+
+.almarai-bold {
+    font-family: "Almarai", sans-serif;
+    font-weight: 700;
+    font-style: normal;
+}
+
+.almarai-extrabold {
+    font-family: "Almarai", sans-serif;
+    font-weight: 800;
+    font-style: normal;
+}
+
+/* Default English font */
 body {
-    font-family: 'Inter', sans-serif;
+    font-family: "Comfortaa", sans-serif;
     background-color: #000000;
     color: #f0f0f0;
     overflow-x: hidden;
+    font-optical-sizing: auto;
+}
+
+/* Arabic language specific font */
+body[lang="ar"],
+[lang="ar"] {
+    font-family: "Almarai", sans-serif;
+}
+
+/* Ensure headings use appropriate fonts and weights */
+h1, h2, h3, h4, h5, h6 {
+    font-family: inherit;
+    letter-spacing: -0.02em;
+}
+
+/* Specific heading weights for better typography */
+h1 {
+    font-weight: 700;
+}
+
+h2 {
+    font-weight: 600;
+}
+
+h3, h4 {
+    font-weight: 500;
+}
+
+h5, h6 {
+    font-weight: 400;
+}
+
+/* Arabic heading adjustments */
+[lang="ar"] h1,
+[lang="ar"] h2,
+[lang="ar"] h3,
+[lang="ar"] h4,
+[lang="ar"] h5,
+[lang="ar"] h6 {
+    letter-spacing: 0;
+}
+
+[lang="ar"] h1 {
+    font-weight: 800;
+}
+
+[lang="ar"] h2 {
+    font-weight: 700;
+}
+
+[lang="ar"] h3,
+[lang="ar"] h4 {
+    font-weight: 400;
+}
+
+/* Form inputs and textareas should inherit fonts */
+input, textarea, select, button {
+    font-family: inherit;
+    transition: font-family 0.3s ease;
+}
+
+/* Button specific styles */
+button {
+    font-weight: 500;
+}
+
+[lang="ar"] button {
+    font-weight: 400;
+}
+
+/* Smooth font transition when switching languages */
+body, * {
+    transition: font-family 0.2s ease-in-out;
+}
+
+/* Code and monospace elements should remain consistent */
+code, pre, .font-mono {
+    font-family: 'Courier New', Courier, monospace !important;
+}
+
+/* Special text styles */
+.gradient-text {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Ensure admin panel uses correct fonts */
+.admin-panel,
+[class*="admin"] {
+    font-family: inherit;
+}
+
+/* Contact form specific styles */
+.contact-form input,
+.contact-form textarea {
+    font-family: inherit;
+    font-weight: 400;
+}
+
+/* Logo/Brand text should always use Comfortaa */
+.brand-text,
+.logo-text {
+    font-family: "Comfortaa", sans-serif !important;
 }
 #webgl-canvas {
     position: fixed;
@@ -70,10 +241,68 @@ html { -ms-overflow-style: none; scrollbar-width: none; }
     transform: scale(1);
 }
 
+/* Modal text should use correct fonts */
+.modal-content h1,
+.modal-content h2,
+.modal-content h3,
+.modal-content h4,
+.modal-content h5,
+.modal-content h6,
+.modal-content p,
+.modal-content div {
+    font-family: inherit;
+}
+
 .btn-primary {
     background-color: #B9314F;
 }
 
 .btn-primary:hover {
     background-color: #94273f;
+}
+
+/* RTL Support for Arabic */
+[dir="rtl"] {
+    text-align: right;
+    font-family: "Almarai", sans-serif;
+}
+
+[dir="rtl"] .text-left {
+    text-align: right;
+}
+
+[dir="rtl"] .text-right {
+    text-align: left;
+}
+
+/* Arabic-specific input styling */
+[dir="rtl"] input,
+[dir="rtl"] textarea,
+[dir="rtl"] select,
+input[dir="rtl"],
+textarea[dir="rtl"],
+select[dir="rtl"] {
+    font-family: "Almarai", sans-serif;
+    text-align: right;
+}
+
+/* Ensure admin pages use correct fonts */
+.text-right[dir="rtl"] {
+    font-family: "Almarai", sans-serif;
+}
+
+/* Fix spacing for RTL */
+[dir="rtl"] .space-x-8 > * + * {
+    margin-left: 0;
+    margin-right: 2rem;
+}
+
+[dir="rtl"] nav {
+    direction: rtl;
+}
+
+/* Ensure canvas stays in correct position for RTL */
+[dir="rtl"] #webgl-canvas {
+    left: auto;
+    right: 0;
 }

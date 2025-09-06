@@ -26,9 +26,10 @@
 ## ✨ Features
 
 ### 🎨 **Immersive 3D Experience**
-- **WebGL Particle System**: Dynamic, interactive 3D background with thousands of particles
+- **3D Arabic Letters**: Floating Arabic characters (س, ص, م, ع, ن, ر, ق, ل, ك, ي) that move with scroll
+- **Optimized Particle System**: 1,500 particles creating an atmospheric background
 - **Scroll-Triggered Animations**: GSAP-powered animations that respond to user scrolling
-- **Post-Processing Effects**: Advanced visual effects including bloom and depth of field
+- **Dynamic Voxel World**: 3D voxels in the final layer representing the game engine
 - **Responsive 3D Canvas**: Adapts seamlessly to all screen sizes
 
 ### 🏗️ **Modern Architecture**
@@ -37,16 +38,20 @@
 - **Prisma ORM**: Type-safe database access with SQLite
 - **RESTful API**: Full CRUD operations for dynamic content management
 
-### 🌐 **Bilingual Support** (Coming Soon)
+### 🌐 **Bilingual Support** ✅
 - **English/Arabic**: Full RTL support with seamless language switching
-- **Dynamic Translations**: All content available in both languages
-- **Locale-Based Routing**: SEO-friendly URLs for each language
+- **Browser Language Detection**: Automatically detects and sets user's preferred language
+- **Dynamic Translations**: All UI content available in both languages
+- **Persistent Language Choice**: Remembers user's language preference
+- **RTL Layout**: Complete right-to-left layout support for Arabic
 
 ### 📝 **Content Management**
 - **Admin Dashboard**: Password-protected admin interface for content management
-- **Dynamic Projects**: Showcase your work with database-driven project sections
-- **Blog System**: Built-in blog with markdown support and metadata
-- **Contact Form**: Integrated contact form with database storage
+- **Keystatic CMS**: Built-in headless CMS with visual editor for content creation
+- **Dynamic Projects**: Database-driven project sections with Seen (س), Summon, and Hearthshire
+- **Blog System**: Built-in blog with full CRUD operations
+- **Contact Form**: Secure contact form with database storage (no email exposure)
+- **Services Management**: Dynamic services showcase with modal presentation
 
 ### 🎯 **Performance Optimized**
 - **Code Splitting**: Automatic code splitting for optimal loading

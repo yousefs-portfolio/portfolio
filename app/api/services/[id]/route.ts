@@ -9,7 +9,15 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     if (!service) {
       return NextResponse.json({ error: 'Service not found' }, { status: 404 })
     }
-    return NextResponse.json(service)
+    
+    // Parse JSON strings back to arrays for client
+    const parsedService = {
+      ...service,
+      features: service.features ? JSON.parse(service.features) : [],
+      featuresAr: service.featuresAr ? JSON.parse(service.featuresAr) : []
+    }
+    
+    return NextResponse.json(parsedService)
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch service' }, { status: 500 })
   }
@@ -18,12 +26,29 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const body = await request.json()
+    
+    // Convert arrays to JSON strings for SQLite storage
+    const serviceData = {
+      ...body,
+      features: Array.isArray(body.features) ? JSON.stringify(body.features) : '[]',
+      featuresAr: Array.isArray(body.featuresAr) ? JSON.stringify(body.featuresAr) : '[]'
+    }
+    
     const service = await prisma.service.update({
       where: { id: params.id },
-      data: body
+      data: serviceData
     })
-    return NextResponse.json(service)
+    
+    // Parse JSON strings back to arrays for response
+    const parsedService = {
+      ...service,
+      features: service.features ? JSON.parse(service.features) : [],
+      featuresAr: service.featuresAr ? JSON.parse(service.featuresAr) : []
+    }
+    
+    return NextResponse.json(parsedService)
   } catch (error) {
+    console.error('Failed to update service:', error)
     return NextResponse.json({ error: 'Failed to update service' }, { status: 500 })
   }
 }

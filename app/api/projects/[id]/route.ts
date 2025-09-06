@@ -9,7 +9,15 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     if (!project) {
       return NextResponse.json({ error: 'Project not found' }, { status: 404 })
     }
-    return NextResponse.json(project)
+    
+    // Parse JSON strings back to arrays for client
+    const parsedProject = {
+      ...project,
+      tech: project.tech ? JSON.parse(project.tech) : [],
+      techAr: project.techAr ? JSON.parse(project.techAr) : []
+    }
+    
+    return NextResponse.json(parsedProject)
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch project' }, { status: 500 })
   }
@@ -18,12 +26,29 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const body = await request.json()
+    
+    // Convert arrays to JSON strings for SQLite storage
+    const projectData = {
+      ...body,
+      tech: Array.isArray(body.tech) ? JSON.stringify(body.tech) : '[]',
+      techAr: Array.isArray(body.techAr) ? JSON.stringify(body.techAr) : '[]'
+    }
+    
     const project = await prisma.project.update({
       where: { id: params.id },
-      data: body
+      data: projectData
     })
-    return NextResponse.json(project)
+    
+    // Parse JSON strings back to arrays for response
+    const parsedProject = {
+      ...project,
+      tech: project.tech ? JSON.parse(project.tech) : [],
+      techAr: project.techAr ? JSON.parse(project.techAr) : []
+    }
+    
+    return NextResponse.json(parsedProject)
   } catch (error) {
+    console.error('Failed to update project:', error)
     return NextResponse.json({ error: 'Failed to update project' }, { status: 500 })
   }
 }

@@ -86,13 +86,19 @@ export default function ServicesModal({ isOpen, onClose }: ServicesModalProps) {
           </div>
         )}
         
-        <a 
-          href="mailto:yousef.baitalmal.dev@email.com?subject=Project Inquiry" 
+        <button 
+          onClick={() => {
+            onClose()  // Close the modal
+            // Scroll to contact section
+            setTimeout(() => {
+              document.querySelector('#contact')?.scrollIntoView({ behavior: 'smooth' })
+            }, 100)
+          }}
           className="mt-10 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-red-800 transition-all transform hover:scale-105 inline-block" 
           style={{ backgroundColor: '#B9314F' }}
         >
           Hire Me
-        </a>
+        </button>
       </div>
       
       <button 
