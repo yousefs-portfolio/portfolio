@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
-import { gsap } from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import {useEffect, useRef} from 'react'
+import {gsap} from 'gsap'
+import {ScrollTrigger} from 'gsap/ScrollTrigger'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -13,12 +13,15 @@ export default function ThreeBackground() {
     if (!canvasRef.current) return
     if (typeof window === 'undefined') return
 
+    let renderer: any
+    let animationId: number
+
     // Import Three.js dynamically to avoid SSR issues
     import('three').then((THREE) => {
       // Core Three.js Setup
       const scene = new THREE.Scene()
       const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
-      const renderer = new THREE.WebGLRenderer({ canvas: canvasRef.current! })
+      renderer = new THREE.WebGLRenderer({canvas: canvasRef.current!})
       renderer.setSize(window.innerWidth, window.innerHeight)
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 
@@ -60,7 +63,7 @@ export default function ThreeBackground() {
           transparent: true,
           side: THREE.DoubleSide,
           depthWrite: false,
-          opacity: 0.6,
+          opacity: 0.0, // Start invisible, will be controlled by GSAP
           blending: THREE.AdditiveBlending
         })
         
@@ -69,15 +72,15 @@ export default function ThreeBackground() {
       
       // Create Arabic letters in the space between hero and first project
       // These replace the old wireframe boxes
-      for (let i = 0; i < 20; i++) {
+      for (let i = 0; i < 30; i++) {  // Increased count for better coverage
         const letter = arabicLetters[Math.floor(Math.random() * arabicLetters.length)]
         // Use purple color like the old wireframe boxes
         const mesh = createArabicLetter(letter, Math.random() * 2 + 1.5, 'rgba(159, 122, 234, 0.8)')
-        
-        // Position between hero and first project (z: -10 to -25)
+
+        // Position across full screen width
         mesh.position.set(
-          (Math.random() - 0.5) * 15,
-          (Math.random() - 0.5) * 10,
+          (Math.random() - 0.5) * 40,  // Increased range for full screen coverage
+          (Math.random() - 0.5) * 15,  // Increased vertical range
           -10 - Math.random() * 15
         )
         
@@ -118,9 +121,10 @@ export default function ThreeBackground() {
         map: createParticleTexture(),
         color: 0x4A55A2, // Navy Blue
         size: 0.3,
-        blending: THREE.AdditiveBlending,
+        blending: THREE.NormalBlending, // Use normal blending to reduce interference
         transparent: true,
         depthWrite: false,
+        opacity: 1.0, // Will be controlled by GSAP
       })
       
       const jrpgParticles = new THREE.Points(particlesGeometry, particlesMaterial)
@@ -128,7 +132,12 @@ export default function ThreeBackground() {
 
       // Add Arabic letters group to the scene (replaces wireframe boxes)
       scene.add(arabicLettersGroup)
-      arabicLettersGroup.position.z = -20  // Position between hero and first project
+      arabicLettersGroup.position.z = -25  // Start further back to prevent initial overlap
+      arabicLettersGroup.visible = false  // Start hidden
+      // Set initial opacity for all letter materials
+      letterMeshes.forEach(mesh => {
+        mesh.material.opacity = 0
+      })
 
       // Keep voxels for the third layer
       const hearthshireGroup = new THREE.Group()
@@ -164,30 +173,101 @@ export default function ThreeBackground() {
         hearthshireGroup.add(mesh)
       }
 
+      // Initial positions and visibility
       seenGroup.position.z = 0
-      hearthshireGroup.position.z = -60
-      scene.add(seenGroup, hearthshireGroup)
+      seenGroup.visible = true
+      particlesMaterial.opacity = 1.0
 
-      // GSAP Scroll Animation
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: 'main',
-          start: 'top top',
-          end: 'bottom bottom',
-          scrub: 1,
-        }
-      })
-      
-      // Camera and Arabic letters movement with scroll
-      tl.to(camera.position, { z: -30, ease: 'power1.inOut' }, 0)
-        .to(arabicLettersGroup.position, { z: 5, ease: 'power1.inOut' }, 0)  // Letters move forward as you scroll
-        .to(camera.rotation, { y: Math.PI * 0.15, ease: 'power1.inOut' }, '<')
-        .to(arabicLettersGroup.rotation, { y: Math.PI * 0.5, ease: 'power1.inOut' }, '<')  // Letters rotate as they pass
-        .to(camera.position, { z: -55, ease: 'power1.inOut' })
-        .to(arabicLettersGroup.position, { z: 30, opacity: 0.1, ease: 'power1.inOut' }, '<')  // Letters fade as they go behind
-        .to(camera.rotation, { y: 0, ease: 'power1.inOut' })
-        .to(camera.position, { x: 2, ease: 'power1.inOut' }, '>')
-        .to(camera.position, { x: 0, z: -85, ease: 'power1.inOut' })
+      arabicLettersGroup.position.z = -30
+      arabicLettersGroup.visible = false
+
+      hearthshireGroup.position.z = -70  // Push further back
+      hearthshireGroup.visible = false
+
+      scene.add(seenGroup, arabicLettersGroup, hearthshireGroup)
+
+      // Initial camera position
+      camera.position.set(0, 0, 10)  // Start in front of particles
+
+      // Wait for DOM to be ready, then create unified timeline
+      setTimeout(() => {
+        // Create main timeline with scroll trigger
+        const mainTimeline = gsap.timeline({
+          scrollTrigger: {
+            trigger: 'main',
+            start: 'top top',
+            end: 'bottom bottom',
+            scrub: 1,
+            onUpdate: function (self) {
+              const progress = self.progress
+
+              // Progress-based visibility management
+              if (progress < 0.3) {
+                // Hero to Seen section - Particles visible
+                seenGroup.visible = true
+                arabicLettersGroup.visible = false
+                hearthshireGroup.visible = false
+                particlesMaterial.opacity = 1
+              } else if (progress >= 0.3 && progress < 0.6) {
+                // Summon section - Transition to Arabic letters
+                seenGroup.visible = true
+                arabicLettersGroup.visible = true
+                hearthshireGroup.visible = false
+
+                const transitionProgress = (progress - 0.3) / 0.3
+                particlesMaterial.opacity = Math.max(0, 1 - transitionProgress * 1.5)
+
+                letterMeshes.forEach(mesh => {
+                  mesh.material.opacity = 0.6 * transitionProgress
+                })
+
+                if (transitionProgress > 0.9) {
+                  seenGroup.visible = false
+                }
+              } else if (progress >= 0.6 && progress < 0.85) {
+                // Hearthshire section - Transition to voxels
+                seenGroup.visible = false
+                arabicLettersGroup.visible = true
+                hearthshireGroup.visible = true
+
+                const transitionProgress = (progress - 0.6) / 0.25
+                letterMeshes.forEach(mesh => {
+                  mesh.material.opacity = Math.max(0.1, 0.6 * (1 - transitionProgress))
+                })
+
+                if (transitionProgress > 0.9) {
+                  arabicLettersGroup.visible = false
+                }
+              } else {
+                // Contact section - Only voxels
+                seenGroup.visible = false
+                arabicLettersGroup.visible = false
+                hearthshireGroup.visible = true
+              }
+            }
+          }
+        })
+
+        // Animate camera and groups through the timeline
+        mainTimeline
+          // Hero phase (0-30%)
+          .to(camera.position, {z: 0, duration: 0.3, ease: 'power1.inOut'}, 0)
+
+          // Summon phase (30-60%) - Show Arabic letters
+          .to(camera.position, {z: -25, duration: 0.3, ease: 'power1.inOut'}, 0.3)
+          .to(camera.rotation, {y: Math.PI * 0.1, duration: 0.3, ease: 'power1.inOut'}, 0.3)
+          .to(arabicLettersGroup.position, {z: -5, duration: 0.3, ease: 'power1.inOut'}, 0.3)
+          .to(arabicLettersGroup.rotation, {y: Math.PI * 0.3, duration: 0.3, ease: 'power1.inOut'}, 0.3)
+
+          // Hearthshire phase (60-85%) - Show voxels
+          .to(camera.position, {z: -65, duration: 0.25, ease: 'power1.inOut'}, 0.6)
+          .to(camera.rotation, {y: 0, duration: 0.25, ease: 'power1.inOut'}, 0.6)
+          .to(arabicLettersGroup.position, {z: 20, duration: 0.25, ease: 'power1.inOut'}, 0.6)
+
+          // Contact phase (85-100%)
+          .to(camera.position, {z: -75, x: 2, duration: 0.15, ease: 'power1.inOut'}, 0.85)
+          .to(camera.position, {x: 0, duration: 0.15, ease: 'power1.inOut'}, 0.9)
+      }, 100)  // Small delay to ensure DOM is ready
 
       // Mouse Interaction & Render Loop
       const cursor = { x: 0, y: 0 }
@@ -202,26 +282,26 @@ export default function ThreeBackground() {
         const elapsedTime = clock.getElapsedTime()
         camera.position.x += (cursor.x * 0.5 - camera.position.x) * 0.05
         camera.position.y += (cursor.y * 0.5 - camera.position.y) * 0.05
-        
+
         // Animate Arabic letters
         letterMeshes.forEach((mesh, index) => {
           // Gentle floating motion
           mesh.position.y += Math.sin(elapsedTime * 0.5 + index) * 0.003
-          
+
           // Slow rotation
           mesh.rotation.x += 0.002
           mesh.rotation.y += 0.003
-          
+
           // Subtle drift
           mesh.position.x += Math.cos(elapsedTime * 0.3 + index) * 0.002
         })
-        
+
         // Rotate groups
         seenGroup.rotation.y = elapsedTime * 0.05
         arabicLettersGroup.rotation.y = elapsedTime * 0.03  // Slower rotation for letters
         hearthshireGroup.rotation.y = elapsedTime * 0.05
         renderer.render(scene, camera)
-        requestAnimationFrame(animate)
+        animationId = requestAnimationFrame(animate)
       }
       animate()
 
@@ -233,6 +313,26 @@ export default function ThreeBackground() {
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
       }
       window.addEventListener('resize', handleResize)
+
+      // Cleanup function
+      return () => {
+        // Kill all ScrollTriggers
+        ScrollTrigger.getAll().forEach(st => st.kill())
+
+        // Stop animation loop
+        if (animationId) {
+          cancelAnimationFrame(animationId)
+        }
+
+        // Clean up Three.js resources
+        if (renderer) {
+          renderer.dispose()
+        }
+
+        // Remove event listeners
+        window.removeEventListener('mousemove', handleMouseMove)
+        window.removeEventListener('resize', handleResize)
+      }
     })
   }, [])
 
