@@ -1,0 +1,55 @@
+---
+title: Building a Custom Game Engine in Rust
+titleAr: بناء محرك ألعاب مخصص في Rust
+excerpt: Exploring the journey of building a high-performance game engine from scratch using Rust, featuring a custom ECS architecture and vulkan renderer.
+excerptAr: استكشاف رحلة بناء محرك ألعاب عالي الأداء من الصفر باستخدام Rust، بما في ذلك بنية ECS مخصصة ومُعرض Vulkan.
+publishedAt: 2024-01-15
+featured: false
+author: Yousef Baitalmal
+tags:
+  - rust
+  - game-development
+  - graphics
+  - systems-programming
+---
+# Building a Custom Game Engine in Rust
+
+Building a game engine from scratch is one of the most rewarding challenges in software engineering. It combines systems programming, graphics, physics, and creative problem-solving.
+
+## Why Rust?
+
+Rust provides the perfect balance of:
+- **Performance**: Zero-cost abstractions and no garbage collector
+- **Safety**: Memory safety without runtime overhead
+- **Concurrency**: Fearless concurrency with the borrow checker
+
+## Architecture Overview
+
+The engine uses a custom Entity Component System (ECS) architecture:
+
+```rust
+pub struct World {
+    entities: Vec<Entity>,
+    components: ComponentStorage,
+    systems: SystemScheduler,
+}
+```
+
+## Rendering Pipeline
+
+Using Vulkan for maximum control over the GPU:
+- Custom render graph system
+- Multi-threaded command buffer recording
+- Efficient resource management
+
+## Performance Considerations
+
+- Data-oriented design for cache efficiency
+- SIMD optimizations for math operations
+- Job system for parallel execution
+
+## Lessons Learned
+
+Building a game engine teaches you about every layer of the computing stack, from CPU cache lines to GPU shader optimization.
+
+*More technical details coming in future posts!*

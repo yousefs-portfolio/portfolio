@@ -1,8 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import {useState} from 'react'
+import {useTranslations} from 'next-intl'
 
 export default function ContactForm() {
+  const t = useTranslations('contact.form')
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -21,6 +23,13 @@ export default function ContactForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Validate that at least WhatsApp is provided
+    if (!formData.whatsapp && !formData.email) {
+      alert(t('contactRequirement'))
+      return
+    }
+
     setIsSubmitting(true)
     setSubmitStatus('idle')
 
@@ -53,7 +62,7 @@ export default function ContactForm() {
           <input
             type="text"
             name="name"
-            placeholder="Your Name *"
+            placeholder={t('namePlaceholder')}
             value={formData.name}
             onChange={handleChange}
             required
@@ -65,7 +74,7 @@ export default function ContactForm() {
           <input
             type="email"
             name="email"
-            placeholder="Your Email"
+            placeholder={t('emailPlaceholder')}
             value={formData.email}
             onChange={handleChange}
             className="w-full px-4 py-3 bg-gray-900/50 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-white/30 transition-colors"
@@ -76,9 +85,10 @@ export default function ContactForm() {
           <input
             type="tel"
             name="whatsapp"
-            placeholder="WhatsApp Number"
+            placeholder={t('whatsappPlaceholder')}
             value={formData.whatsapp}
             onChange={handleChange}
+            required
             className="w-full px-4 py-3 bg-gray-900/50 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-white/30 transition-colors"
           />
         </div>
@@ -86,7 +96,7 @@ export default function ContactForm() {
         <div>
           <textarea
             name="requirements"
-            placeholder="Project Requirements *"
+            placeholder={t('requirementsPlaceholder')}
             value={formData.requirements}
             onChange={handleChange}
             required
@@ -100,24 +110,24 @@ export default function ContactForm() {
           disabled={isSubmitting}
           className="w-full btn-primary text-white px-6 py-3 rounded-lg font-semibold transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
         >
-          {isSubmitting ? 'Sending...' : 'Send Message'}
+          {isSubmitting ? t('sending') : t('send')}
         </button>
         
         {submitStatus === 'success' && (
           <div className="text-green-400 text-center">
-            Message sent successfully! I&apos;ll get back to you soon.
+            {t('success')}
           </div>
         )}
         
         {submitStatus === 'error' && (
           <div className="text-red-400 text-center">
-            Failed to send message. Please try again or email directly.
+            {t('error')}
           </div>
         )}
       </form>
       
       <p className="text-gray-500 text-sm text-center mt-4">
-        * Please provide either email or WhatsApp number
+        {t('contactRequirement')}
       </p>
     </div>
   )

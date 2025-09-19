@@ -9,10 +9,11 @@ interface HeaderProps {
   onServicesClick: () => void
 }
 
-export default function Header({ onServicesClick }: HeaderProps) {
+export default function LocaleHeader({onServicesClick}: HeaderProps) {
   const [mounted, setMounted] = useState(false)
-  const locale = useLocale()
   const t = useTranslations()
+  const locale = useLocale()
+  const isArabic = locale === 'ar'
 
   useEffect(() => {
     setMounted(true)
@@ -20,14 +21,14 @@ export default function Header({ onServicesClick }: HeaderProps) {
 
   const scrollToContact = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault()
-    document.querySelector('#contact')?.scrollIntoView({ behavior: 'smooth' })
+    document.querySelector('#contact')?.scrollIntoView({behavior: 'smooth'})
   }
 
   if (!mounted) {
     return (
       <header className="fixed top-0 left-0 right-0 z-50 p-6 flex justify-between items-center">
         <Link href={`/${locale}`} className="text-xl font-bold tracking-tighter">YOUSEF BAITALMAL</Link>
-        <nav className="hidden md:flex items-center space-x-8">
+        <nav className={`hidden md:flex items-center ${isArabic ? 'space-x-reverse space-x-8' : 'space-x-8'}`}>
           <Link href={`/${locale}/blog`} className="hover:text-white transition-colors">{t('nav.blog')}</Link>
           <button className="hover:text-white transition-colors">{t('nav.services')}</button>
           <a href="#contact" className="hover:text-white transition-colors">{t('nav.contact')}</a>
@@ -43,15 +44,17 @@ export default function Header({ onServicesClick }: HeaderProps) {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 p-6 flex justify-between items-center">
       <Link href={`/${locale}`} className="text-xl font-bold tracking-tighter">YOUSEF BAITALMAL</Link>
-      <nav className="hidden md:flex items-center space-x-8">
+      <nav className={`hidden md:flex items-center ${isArabic ? 'space-x-reverse space-x-8' : 'space-x-8'}`}>
         <Link href={`/${locale}/blog`} className="hover:text-white transition-colors">{t('nav.blog')}</Link>
-        <button id="services-btn" onClick={onServicesClick} className="hover:text-white transition-colors">{t('nav.services')}</button>
-        <a href="#contact" onClick={scrollToContact} className="hover:text-white transition-colors">{t('nav.contact')}</a>
+        <button id="services-btn" onClick={onServicesClick}
+                className="hover:text-white transition-colors">{t('nav.services')}</button>
+        <a href="#contact" onClick={scrollToContact}
+           className="hover:text-white transition-colors">{t('nav.contact')}</a>
         <LocaleLanguageToggle/>
       </nav>
-      <button id="mobile-menu-btn" className="md:hidden z-50">
+      <button className="md:hidden z-50">
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16"/>
         </svg>
       </button>
     </header>
