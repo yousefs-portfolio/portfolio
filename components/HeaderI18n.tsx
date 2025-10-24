@@ -1,8 +1,8 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslations, useLocale } from 'next-intl'
-import { useRouter } from 'next/navigation'
+import { signOut, useSession } from 'next-auth/react'
 import LanguageSwitcher from './LanguageSwitcher'
 
 interface HeaderProps {
@@ -13,54 +13,21 @@ export default function Header({ onServicesClick }: HeaderProps) {
   const t = useTranslations('nav')
   const locale = useLocale()
   const [mounted, setMounted] = useState(false)
-  const [isAdmin, setIsAdmin] = useState(false)
-  const router = useRouter()
+  const { data: session, status } = useSession()
 
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  const checkSession = useCallback(async () => {
-    try {
-      const response = await fetch('/api/auth/session', { cache: 'no-store' })
-      if (!response.ok) {
-        setIsAdmin(false)
-        return
-      }
-      const data = await response.json()
-      setIsAdmin(Boolean(data.authenticated))
-    } catch {
-      setIsAdmin(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    checkSession()
-  }, [checkSession])
-
-  useEffect(() => {
-    const handleFocus = () => {
-      checkSession()
-    }
-
-    window.addEventListener('focus', handleFocus)
-    return () => window.removeEventListener('focus', handleFocus)
-  }, [checkSession])
+  const isAdmin = status === 'authenticated' && Boolean(session?.user?.isAdmin)
 
   const scrollToContact = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault()
     document.querySelector('#contact')?.scrollIntoView({ behavior: 'smooth' })
   }
 
-  const handleLogout = async () => {
-    try {
-      await fetch('/api/auth/logout', { method: 'POST' })
-    } catch {
-      // ignore
-    } finally {
-      setIsAdmin(false)
-      router.refresh()
-    }
+  const handleLogout = () => {
+    void signOut({ callbackUrl: `/${locale}` })
   }
 
   if (!mounted) {

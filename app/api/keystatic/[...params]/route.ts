@@ -1,7 +1,9 @@
-import {NextResponse} from 'next/server';
-import {makeRouteHandler} from '@keystatic/next/route-handler';
-import config from '../../../../keystatic.config';
-import {getSession} from '@/lib/auth';
+import { NextResponse } from 'next/server';
+import { getServerSession } from 'next-auth/next';
+import { makeRouteHandler } from '@keystatic/next/route-handler';
+
+import config from '@/keystatic/keystatic.config';
+import { authOptions } from '@adapters/auth/nextauth';
 
 // Ensure API uses Node.js runtime and is fully dynamic
 export const runtime = 'nodejs';
@@ -14,8 +16,8 @@ const keystaticHandlers = makeRouteHandler({
 function withAuthentication<T extends (request: Request, context: any) => Promise<Response>>(handler?: T) {
   if (!handler) return undefined;
   return async (request: Request, context: any) => {
-    const session = await getSession();
-    if (!session.authenticated || session.user.mustChangePassword) {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.isAdmin || session.user.mustChangePassword) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     return handler(request, context);

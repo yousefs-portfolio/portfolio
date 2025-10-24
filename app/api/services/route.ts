@@ -1,31 +1,27 @@
-import { NextResponse } from 'next/server'
-import config from '../../../keystatic.config'
+import { NextResponse } from 'next/server';
+
+import { keystaticServiceContent } from '@adapters/content/keystatic/service.content';
+import { listServices } from '@core/use-cases/list-services';
 
 export const runtime = 'nodejs'
 
 export async function GET() {
   try {
-    const { createReader } = await import('@keystatic/core/reader') as any
-    const reader = createReader(process.cwd(), config)
+    const services = await listServices({
+      serviceContentReader: keystaticServiceContent,
+    });
 
-    const items = await reader.collections.services.all()
+    const payload = services.map((service) => ({
+      id: service.id,
+      title: service.title,
+      description: service.description,
+      featured: service.featured,
+      order: service.order,
+    }));
 
-    const services = items
-      .map((item: any) => {
-        const e = item.entry || {}
-        return {
-          id: item.slug,
-          title: e.title?.name ?? e.title ?? item.slug,
-          description: typeof e.description === 'string' ? e.description : '',
-          featured: Boolean(e.featured ?? true),
-          order: Number(e.order ?? 0),
-        }
-      })
-      .sort((a: any, b: any) => a.order - b.order)
-
-    return NextResponse.json(services, { status: 200 })
+    return NextResponse.json(payload, { status: 200 })
   } catch (error: any) {
-    console.error('Error reading services from Keystatic:', error)
+    console.error('Error reading services from Keystatic:', error);
     return NextResponse.json({ error: 'Failed to load services' }, { status: 500 })
   }
 }

@@ -1,6 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import {useEffect, useState} from 'react'
+import {signOut, useSession} from 'next-auth/react'
+import {useLocale} from 'next-intl'
 
 type ProjectCategory = 'web' | 'mobile' | 'game'
 
@@ -34,27 +36,15 @@ interface Contact {
 }
 
 export default function AdminPage() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [password, setPassword] = useState('')
+  const {data: session, status} = useSession()
+  const locale = useLocale()
   const [activeTab, setActiveTab] = useState<'projects' | 'services' | 'contacts'>('projects')
   
   const [projects, setProjects] = useState<Project[]>([])
   const [services, setServices] = useState<Service[]>([])
   const [contacts, setContacts] = useState<Contact[]>([])
-  
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (password === 'admin123') {
-      setIsAuthenticated(true)
-      setError('')
-      fetchData()
-    } else {
-      setError('Invalid password')
-    }
-  }
 
   const fetchData = async () => {
     setLoading(true)
@@ -74,6 +64,13 @@ export default function AdminPage() {
       setLoading(false)
     }
   }
+
+  useEffect(() => {
+    if (status === 'authenticated' && session?.user?.isAdmin) {
+      void fetchData()
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status, session?.user?.isAdmin])
 
   const deleteProject = async (id: string) => {
     if (confirm('Are you sure you want to delete this project?')) {
@@ -97,28 +94,25 @@ export default function AdminPage() {
     }
   }
 
-  if (!isAuthenticated) {
+  if (status === 'loading') {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <div className="max-w-md w-full p-8">
-          <h1 className="text-2xl font-bold mb-6 text-center">Admin Login</h1>
-          <form onSubmit={handleLogin} className="space-y-4">
-            <input
-              type="password"
-              placeholder="Enter admin password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
-            />
-            <button
-              type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition-colors"
-            >
-              Login
-            </button>
-            {error && <p className="text-red-400 text-center">{error}</p>}
-          </form>
-        </div>
+        <div className="text-gray-400">Loading…</div>
+      </div>
+    )
+  }
+
+  if (!session?.user?.isAdmin) {
+    return (
+      <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center space-y-4">
+        <h1 className="text-3xl font-bold">Admin Access Required</h1>
+        <p className="text-gray-400">Please sign in at the admin portal.</p>
+        <a
+          href="/admin/login"
+          className="px-6 py-3 rounded-lg bg-white text-black font-semibold hover:bg-gray-200 transition"
+        >
+          Go to Admin Login
+        </a>
       </div>
     )
   }
@@ -129,7 +123,7 @@ export default function AdminPage() {
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">Admin Dashboard</h1>
           <button
-            onClick={() => setIsAuthenticated(false)}
+            onClick={() => signOut({callbackUrl: `/${locale}`})}
             className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
           >
             Logout

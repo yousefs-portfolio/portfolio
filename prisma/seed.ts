@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client'
-import { randomBytes, scryptSync } from 'crypto'
+import { hashPassword } from '../lib/auth'
 
 const prisma = new PrismaClient()
 
@@ -93,8 +93,7 @@ async function main() {
   // Seed admin user with default credentials (admin / admin)
   const defaultUsername = 'admin'
   const defaultPassword = 'admin'
-  const salt = randomBytes(16).toString('hex')
-  const hash = scryptSync(defaultPassword, salt, 64).toString('hex')
+  const { hash, salt } = hashPassword(defaultPassword)
 
   await prisma.user.upsert({
     where: { username: defaultUsername },

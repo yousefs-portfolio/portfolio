@@ -133,6 +133,12 @@
 | `npm run build` | Build for production |
 | `npm start` | Start production server |
 | `npm run lint` | Run ESLint |
+| `npm run typecheck` | Run TypeScript in strict no-emit mode |
+| `npm run test` | Execute unit tests with Vitest |
+| `npm run format` | Check formatting with Prettier |
+| `npm run format:fix` | Format all files with Prettier |
+| `npm run e2e` | Execute Playwright test suite |
+| `npm run ci` | Run linting, type-checking, and unit tests |
 | `npm run db:push` | Push Prisma schema to database |
 | `npm run db:studio` | Open Prisma Studio GUI |
 
@@ -144,33 +150,39 @@
 
 ```
 portfolio/
-├── app/                    # Next.js App Router
-│   ├── api/               # API Routes
-│   │   ├── blog/         # Blog CRUD endpoints
-│   │   ├── contacts/     # Contact form submissions
-│   │   ├── projects/     # Project management
-│   │   └── services/     # Services CRUD
-│   ├── admin/            # Admin dashboard
-│   ├── blog/             # Blog pages
-│   ├── components/       # React components
-│   │   ├── ContactForm.tsx
-│   │   ├── Header.tsx
-│   │   ├── ServicesModal.tsx
-│   │   └── ThreeBackground.tsx
-│   ├── globals.css       # Global styles
-│   ├── layout.tsx        # Root layout
-│   └── page.tsx          # Homepage
-├── prisma/
-│   ├── schema.prisma     # Database schema
-│   ├── seed.js          # Database seeder
-│   └── dev.db           # SQLite database
-├── public/              # Static assets
-├── messages/           # i18n translations
-│   ├── en.json        # English translations
-│   └── ar.json        # Arabic translations
-└── package.json       # Dependencies
+├── app/                           # Next.js App Router (UI + HTTP controllers only)
+│   ├── api/                      # Route handlers call use-cases
+│   └── (public routes)/          # Pages/components consuming API responses
+├── adapters/                     # Framework & I/O implementations (outer layer)
+│   ├── auth/nextauth.ts          # NextAuth wiring via use-cases
+│   ├── content/keystatic/        # Keystatic-backed content readers
+│   └── db/prisma/                # Prisma repositories + transaction adapter
+├── core/                         # Clean Architecture center (pure TypeScript)
+│   ├── domain/                   # Entities/value objects
+│   ├── interfaces/               # Ports consumed by use-cases
+│   ├── use-cases/                # Application services / orchestration
+│   └── lib/                      # Cross-cutting pure helpers (errors, etc.)
+├── config/                       # Environment parsing and runtime settings
+├── keystatic/
+│   ├── keystatic.config.ts       # Keystatic configuration
+│   └── content/                  # Markdown/Markdoc content managed by Keystatic
+├── prisma/                       # Schema, migrations, and seeds
+├── tests/
+│   └── unit/                     # Use-case unit tests (Vitest)
+├── public/                       # Static assets
+└── package.json                  # Scripts and dependencies
 
 ```
+
+**Dependency rule:** `app` → `adapters` → `core/interfaces` → `core/use-cases` → `core/domain`. The flow always points inward, keeping framework and persistence concerns at the boundary.
+
+#### Adding a new use-case
+1. Model the behaviour in `core/domain` (entities/value objects) if new types are needed.
+2. Define/extend the required ports in `core/interfaces`.
+3. Implement the orchestration in `core/use-cases/<feature>.ts` returning plain data.
+4. Provide an adapter in `adapters/*` that satisfies the new port (Prisma, Keystatic, etc.).
+5. Call the use-case from an API route or server action in `app/`, validating inputs with Zod.
+6. Add targeted unit tests under `tests/unit/use-cases`.
 
 ### Database Schema
 
@@ -236,28 +248,22 @@ model User {
 ## 🔌 API Endpoints
 
 ### Projects
-- `GET /api/projects` - List all projects
-- `GET /api/projects/:id` - Get single project
-- `POST /api/projects` - Create project (admin)
-- `PUT /api/projects/:id` - Update project (admin)
-- `DELETE /api/projects/:id` - Delete project (admin)
+- `GET /api/projects` - List all projects sourced via Keystatic
 
 ### Blog Posts
-- `GET /api/blog` - List all published posts
-- `GET /api/blog/:slug` - Get post by slug
-- `POST /api/blog` - Create post (admin)
-- `PUT /api/blog/:id` - Update post (admin)
-- `DELETE /api/blog/:id` - Delete post (admin)
+- `GET /api/blog` - List published posts with optional `featured`, `limit`, and `tag` filters
+- `GET /api/blog/[slug]` - Fetch post by slug with Markdown payload
+- `GET /api/blog/tags` - List unique tags
 
 ### Services
-- `GET /api/services` - List all services
-- `POST /api/services` - Create service (admin)
-- `DELETE /api/services/:id` - Delete service (admin)
+- `GET /api/services` - List services sourced via Keystatic
 
 ### Contacts
-- `GET /api/contacts` - List all contacts (admin)
-- `POST /api/contacts` - Submit contact form
-- `DELETE /api/contacts/:id` - Delete contact (admin)
+- `GET /api/contact` - List contact submissions (admin view)
+- `POST /api/contact` - Submit contact form (requires email or WhatsApp)
+
+### Admin
+- `POST /api/admin/change-password` - Update admin password (requires authenticated admin session)
 
 ---
 

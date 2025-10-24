@@ -1,6 +1,7 @@
 import type {Metadata} from "next";
 import {NextIntlClientProvider} from 'next-intl';
 import "../globals.css";
+import AuthProvider from '@/components/AuthProvider';
 
 export const metadata: Metadata = {
   title: "Yousef Baitalmal | Visionary Engineer & Creator",
@@ -43,9 +44,11 @@ export default async function LocaleLayout({
         />
       </head>
       <body suppressHydrationWarning={true} className={isRTL ? 'font-almarai' : 'font-inter'}>
-      <NextIntlClientProvider locale={locale} messages={messages}>
+      <AuthProvider>
+        <NextIntlClientProvider locale={locale} messages={messages}>
           {children}
         </NextIntlClientProvider>
+      </AuthProvider>
       </body>
     </html>
   );

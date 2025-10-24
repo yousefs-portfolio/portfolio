@@ -1,6 +1,13 @@
 const { PrismaClient } = require('@prisma/client')
 const { randomBytes, scryptSync } = require('crypto')
 
+function hashPassword(password, salt) {
+  const resolvedSalt = salt ?? randomBytes(16).toString('hex')
+  const saltBuffer = Buffer.from(resolvedSalt, 'hex')
+  const derived = scryptSync(password, saltBuffer, 64).toString('hex')
+  return { hash: derived, salt: resolvedSalt }
+}
+
 const prisma = new PrismaClient()
 
 async function main() {
@@ -93,8 +100,7 @@ async function main() {
   // Seed admin user with default credentials (admin / admin)
   const defaultUsername = 'admin'
   const defaultPassword = 'admin'
-  const salt = randomBytes(16).toString('hex')
-  const hash = scryptSync(defaultPassword, salt, 64).toString('hex')
+  const { hash, salt } = hashPassword(defaultPassword)
 
   await prisma.user.upsert({
     where: { username: defaultUsername },
