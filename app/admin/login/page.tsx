@@ -1,15 +1,14 @@
 import {redirect} from 'next/navigation'
-import {getServerSession} from 'next-auth'
 import AdminLoginForm from '@/components/AdminLoginForm'
-import {authOptions} from '@adapters/auth/nextauth'
+import {getAdminServerSession} from '@adapters/auth/session'
 
 export const runtime = 'nodejs'
 
 export default async function AdminLoginPage() {
-  const session = await getServerSession(authOptions)
+  const session = await getAdminServerSession()
 
   if (session?.user?.isAdmin) {
-    redirect('/admin')
+    redirect('/keystatic')
   }
 
   return <AdminLoginForm />
