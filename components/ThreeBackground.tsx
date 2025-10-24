@@ -181,7 +181,7 @@ export default function ThreeBackground() {
       arabicLettersGroup.position.z = -30
       arabicLettersGroup.visible = false
 
-      hearthshireGroup.position.z = -70  // Push further back
+      hearthshireGroup.position.z = -32  // Keep voxels close so the camera immediately flies through them
       hearthshireGroup.visible = false
 
       scene.add(seenGroup, arabicLettersGroup, hearthshireGroup)
@@ -259,13 +259,15 @@ export default function ThreeBackground() {
           .to(arabicLettersGroup.position, {z: -5, duration: 0.3, ease: 'power1.inOut'}, 0.3)
           .to(arabicLettersGroup.rotation, {y: Math.PI * 0.3, duration: 0.3, ease: 'power1.inOut'}, 0.3)
 
-          // Hearthshire phase (60-85%) - Show voxels
-          .to(camera.position, {z: -65, duration: 0.25, ease: 'power1.inOut'}, 0.6)
+          // Hearthshire phase (60-85%) - Show voxels up close
+          .to(camera.position, {z: -32, duration: 0.25, ease: 'power1.inOut'}, 0.6)
           .to(camera.rotation, {y: 0, duration: 0.25, ease: 'power1.inOut'}, 0.6)
           .to(arabicLettersGroup.position, {z: 20, duration: 0.25, ease: 'power1.inOut'}, 0.6)
+          .to(hearthshireGroup.position, {z: -34, duration: 0.25, ease: 'power1.inOut'}, 0.6)
 
           // Contact phase (85-100%)
-          .to(camera.position, {z: -75, x: 2, duration: 0.15, ease: 'power1.inOut'}, 0.85)
+          .to(camera.position, {z: -38, x: 2, duration: 0.2, ease: 'power1.inOut'}, 0.85)
+          .to(hearthshireGroup.position, {z: -40, duration: 0.2, ease: 'power1.inOut'}, 0.85)
           .to(camera.position, {x: 0, duration: 0.15, ease: 'power1.inOut'}, 0.9)
       }, 100)  // Small delay to ensure DOM is ready
 

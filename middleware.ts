@@ -14,7 +14,7 @@ export default function middleware(request: NextRequest) {
   const shouldNotRedirect =
     pathname.startsWith('/api') ||
     pathname.startsWith('/_next') ||
-    pathname.startsWith('/keystatic') ||
+    pathname.startsWith('/admin') ||
     pathname.includes('.') || // Has file extension
     pathname.startsWith('/favicon');
 

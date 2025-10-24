@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useTranslations, useLocale } from 'next-intl'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
@@ -11,6 +11,10 @@ import ServicesModal from '@/components/ServicesModal'
 import ContactForm from '@/components/ContactForm'
 
 gsap.registerPlugin(ScrollTrigger)
+
+type ProjectCategory = 'web' | 'mobile' | 'game'
+
+const CATEGORY_ORDER: readonly ProjectCategory[] = ['web', 'mobile', 'game']
 
 interface Project {
   id: string
@@ -24,6 +28,7 @@ interface Project {
   content: string
   featured: boolean
   order: number
+  category: ProjectCategory
 }
 
 export default function Home() {
@@ -33,6 +38,7 @@ export default function Home() {
   const [servicesModalOpen, setServicesModalOpen] = useState(false)
   const [projects, setProjects] = useState<Project[]>([])
   const [loading, setLoading] = useState(true)
+  const [activeCategory, setActiveCategory] = useState<'all' | ProjectCategory>('all')
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -49,6 +55,29 @@ export default function Home() {
 
     fetchProjects()
   }, [])
+
+  const availableCategories = useMemo(() => {
+    const set = new Set<ProjectCategory>()
+    projects.forEach((project) => {
+      if (CATEGORY_ORDER.includes(project.category)) {
+        set.add(project.category)
+      }
+    })
+    return CATEGORY_ORDER.filter((category) => set.has(category))
+  }, [projects])
+
+  useEffect(() => {
+    if (activeCategory !== 'all' && !availableCategories.includes(activeCategory)) {
+      setActiveCategory('all')
+    }
+  }, [availableCategories, activeCategory])
+
+  const filteredProjects = useMemo(() => {
+    if (activeCategory === 'all') {
+      return projects
+    }
+    return projects.filter((project) => project.category === activeCategory)
+  }, [projects, activeCategory])
 
   // Set up GSAP animations after projects load
   useEffect(() => {
@@ -144,13 +173,46 @@ export default function Home() {
           </p>
         </ContentSection>
         
+        {/* Project Filters */}
+        {!loading && projects.length > 0 && availableCategories.length > 0 && (
+          <ContentSection id="project-filters" className="pt-0">
+            <div className="flex flex-wrap justify-center gap-3">
+              <button
+                type="button"
+                onClick={() => setActiveCategory('all')}
+                className={`px-4 py-2 rounded-full text-xs font-semibold uppercase tracking-widest transition-colors border ${
+                  activeCategory === 'all'
+                    ? 'bg-white text-black border-white'
+                    : 'border-gray-700 text-gray-300 hover:text-white'
+                }`}
+              >
+                {t('projects.filters.all')}
+              </button>
+              {availableCategories.map((category) => (
+                <button
+                  key={category}
+                  type="button"
+                  onClick={() => setActiveCategory(category)}
+                  className={`px-4 py-2 rounded-full text-xs font-semibold uppercase tracking-widest transition-colors border ${
+                    activeCategory === category
+                      ? 'bg-white text-black border-white'
+                      : 'border-gray-700 text-gray-300 hover:text-white'
+                  }`}
+                >
+                  {t(`projects.filters.${category}`)}
+                </button>
+              ))}
+            </div>
+          </ContentSection>
+        )}
+        
         {/* Dynamic Project Sections */}
         {loading ? (
           <ContentSection id="loading">
             <div className="text-gray-400">{t('blog.loading')}</div>
           </ContentSection>
-        ) : (
-          projects.map((project) => (
+        ) : filteredProjects.length > 0 ? (
+          filteredProjects.map((project) => (
             <ContentSection key={project.id} id={project.id.replace('-project', '')}>
               <h3 className={`text-sm font-semibold mb-2 tracking-widest ${getLayerColor(project.layer)}`}>
                 {getLayerLabel(project.layer)}: {getLayerName(project)}
@@ -159,6 +221,10 @@ export default function Home() {
               <p className="text-gray-400 text-lg max-w-2xl mx-auto">{getProjectDescription(project)}</p>
             </ContentSection>
           ))
+        ) : (
+          <ContentSection id="no-projects">
+            <div className="text-gray-400">{t('projects.noProjects')}</div>
+          </ContentSection>
         )}
         
         {/* Contact Section */}

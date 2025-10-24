@@ -1,8 +1,9 @@
 'use client'
 
-import {useEffect, useState} from 'react'
+import {useCallback, useEffect, useState} from 'react'
 import Link from 'next/link'
 import {useLocale, useTranslations} from 'next-intl'
+import {useRouter} from 'next/navigation'
 import LocaleLanguageToggle from './LocaleLanguageToggle'
 
 interface HeaderProps {
@@ -11,17 +12,57 @@ interface HeaderProps {
 
 export default function LocaleHeader({onServicesClick}: HeaderProps) {
   const [mounted, setMounted] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
   const t = useTranslations()
   const locale = useLocale()
   const isArabic = locale === 'ar'
+  const router = useRouter()
 
   useEffect(() => {
     setMounted(true)
   }, [])
 
+  const checkSession = useCallback(async () => {
+    try {
+      const response = await fetch('/api/auth/session', { cache: 'no-store' })
+      if (!response.ok) {
+        setIsAdmin(false)
+        return
+      }
+      const data = await response.json()
+      setIsAdmin(Boolean(data.authenticated))
+    } catch {
+      setIsAdmin(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    checkSession()
+  }, [checkSession])
+
+  useEffect(() => {
+    const handleFocus = () => {
+      checkSession()
+    }
+
+    window.addEventListener('focus', handleFocus)
+    return () => window.removeEventListener('focus', handleFocus)
+  }, [checkSession])
+
   const scrollToContact = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault()
     document.querySelector('#contact')?.scrollIntoView({behavior: 'smooth'})
+  }
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' })
+    } catch {
+      // ignore
+    } finally {
+      setIsAdmin(false)
+      router.refresh()
+    }
   }
 
   if (!mounted) {
@@ -50,6 +91,12 @@ export default function LocaleHeader({onServicesClick}: HeaderProps) {
                 className="hover:text-white transition-colors">{t('nav.services')}</button>
         <a href="#contact" onClick={scrollToContact}
            className="hover:text-white transition-colors">{t('nav.contact')}</a>
+        {isAdmin && (
+          <>
+            <Link href="/admin" className="hover:text-white transition-colors">{t('nav.admin')}</Link>
+            <button onClick={handleLogout} className="hover:text-white transition-colors">{t('nav.logout')}</button>
+          </>
+        )}
         <LocaleLanguageToggle/>
       </nav>
       <button className="md:hidden z-50">

@@ -22,6 +22,7 @@ export async function GET() {
       description?: string
       layer?: string
       layerName?: string
+      category?: string
       featured?: boolean
       order?: number
     }
@@ -32,6 +33,7 @@ export async function GET() {
       description: string
       layer: string
       layerName: string
+      category: string
       content: string
       featured: boolean
       order: number
@@ -45,6 +47,7 @@ export async function GET() {
         const description = typeof e.description === 'string' ? e.description : ''
         const layer = e.layer ?? 'LAYER 1'
         const layerName = e.layerName ?? ''
+        const category = e.category ?? 'web'
         const featured = Boolean(e.featured ?? true)
         const order = Number(e.order ?? 0)
         return {
@@ -53,6 +56,7 @@ export async function GET() {
           description,
           layer,
           layerName,
+          category,
           content: '',
           featured,
           order,

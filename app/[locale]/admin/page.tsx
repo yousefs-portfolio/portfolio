@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 
+type ProjectCategory = 'web' | 'mobile' | 'game'
+
 interface Project {
   id: string
   title: string
@@ -11,6 +13,7 @@ interface Project {
   content: string
   featured: boolean
   order: number
+  category: ProjectCategory
 }
 
 interface Service {
@@ -162,6 +165,7 @@ export default function AdminPage() {
                     <div className="flex-1">
                       <h3 className="text-xl font-semibold mb-2">{project.title}</h3>
                       <p className="text-sm text-gray-400 mb-2">{project.layer}: {project.layerName}</p>
+                      <p className="text-sm text-gray-400 mb-2">Category: {project.category}</p>
                       <p className="text-gray-300 mb-2">{project.description}</p>
                       <div className="flex items-center space-x-4 text-sm">
                         <span className={`px-2 py-1 rounded ${

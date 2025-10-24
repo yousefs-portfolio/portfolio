@@ -1,4 +1,5 @@
 const { PrismaClient } = require('@prisma/client')
+const { randomBytes, scryptSync } = require('crypto')
 
 const prisma = new PrismaClient()
 
@@ -13,6 +14,7 @@ async function main() {
       description: 'A revolutionary systems language built on evidence-based syntax. Here, abstract logic and compiler theory take form.',
       layer: 'LAYER 1',
       layerName: 'THE LANGUAGE',
+      category: 'web',
       content: 'A revolutionary systems language built on evidence-based syntax. Here, abstract logic and compiler theory take form.',
       featured: true,
       order: 1,
@@ -28,6 +30,7 @@ async function main() {
       description: 'The language provides structure. With Summon, that structure becomes tangible UI components—the building blocks of modern applications.',
       layer: 'LAYER 2',
       layerName: 'THE FRAMEWORK',
+      category: 'mobile',
       content: 'The language provides structure. With Summon, that structure becomes tangible UI components—the building blocks of modern applications.',
       featured: true,
       order: 2,
@@ -43,6 +46,7 @@ async function main() {
       description: 'The final layer, where systems and components breathe life into a world. A custom Rust engine powers a universe of 10 billion voxels, rendered with a neural, painterly touch.',
       layer: 'LAYER 3',
       layerName: 'THE EXPERIENCE',
+      category: 'game',
       content: 'The final layer, where systems and components breathe life into a world. A custom Rust engine powers a universe of 10 billion voxels, rendered with a neural, painterly touch.',
       featured: true,
       order: 3,
@@ -86,14 +90,27 @@ async function main() {
     },
   })
 
-  // Seed admin user
+  // Seed admin user with default credentials (admin / admin)
+  const defaultUsername = 'admin'
+  const defaultPassword = 'admin'
+  const salt = randomBytes(16).toString('hex')
+  const hash = scryptSync(defaultPassword, salt, 64).toString('hex')
+
   await prisma.user.upsert({
-    where: { email: 'yousef.baitalmal.dev@email.com' },
-    update: {},
+    where: { username: defaultUsername },
+    update: {
+      passwordHash: hash,
+      passwordSalt: salt,
+      mustChangePassword: true,
+    },
     create: {
+      username: defaultUsername,
       email: 'yousef.baitalmal.dev@email.com',
       name: 'Yousef Baitalmal',
       isAdmin: true,
+      passwordHash: hash,
+      passwordSalt: salt,
+      mustChangePassword: true,
     },
   })
 

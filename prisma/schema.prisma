@@ -16,6 +16,7 @@ model Project {
   layer       String   // "LAYER 1", "LAYER 2", "LAYER 3"
   layerName   String   // "THE LANGUAGE", "THE FRAMEWORK", "THE EXPERIENCE"
   layerNameAr String?  // Arabic layer name
+  category    String   @default("web") // Project category (web, mobile, game)
   content     String   // Detailed content/description
   contentAr   String?  // Arabic content
   tech        String   @default("") // Technologies used (JSON array)
@@ -78,10 +79,14 @@ model Contact {
 }
 
 model User {
-  id       String @id @default(cuid())
-  email    String @unique
-  name     String?
-  isAdmin  Boolean @default(false)
+  id                   String  @id @default(cuid())
+  username             String  @unique
+  email                String? @unique
+  name                 String?
+  passwordHash         String
+  passwordSalt         String
+  mustChangePassword   Boolean @default(true)
+  isAdmin              Boolean @default(false)
   
   @@map("users")
 }

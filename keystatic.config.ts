@@ -104,6 +104,15 @@ export default config({
           label: 'Layer Name (Arabic)',
           validation: { isRequired: false }
         }),
+        category: fields.select({
+          label: 'Category',
+          options: [
+            { label: 'Web', value: 'web' },
+            { label: 'Mobile', value: 'mobile' },
+            { label: 'Game Development', value: 'game' },
+          ],
+          defaultValue: 'web',
+        }),
         featured: fields.checkbox({
           label: 'Featured Project',
           defaultValue: true,

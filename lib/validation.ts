@@ -95,6 +95,7 @@ export const projectSchema = z.object({
   layer: z.string(),
   layerName: z.string().optional().or(z.literal('')),
   layerNameAr: z.string().optional().or(z.literal('')),
+  category: z.enum(['web', 'mobile', 'game']),
   order: z.number().min(0, 'Order must be a positive number'),
   featured: z.boolean()
 })

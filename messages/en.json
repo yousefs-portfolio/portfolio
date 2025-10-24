@@ -8,7 +8,9 @@
     "projects": "Projects",
     "services": "Services",
     "blog": "Blog",
-    "contact": "Contact"
+    "contact": "Contact",
+    "admin": "Admin",
+    "logout": "Logout"
   },
   "hero": {
     "title1": "Engineering",
@@ -33,7 +35,14 @@
     "hearthshire": {
       "title": "Hearthshire",
       "description": "The final layer, where systems and components breathe life into a world. A custom Rust engine powers a universe of 10 billion voxels, rendered with a neural, painterly touch."
-    }
+    },
+    "filters": {
+      "all": "All",
+      "web": "Web",
+      "mobile": "Mobile",
+      "game": "Game Dev"
+    },
+    "noProjects": "No projects to show yet."
   },
   "services": {
     "title": "Services",
