@@ -1,14 +1,32 @@
 import createMiddleware from 'next-intl/middleware';
-import {NextRequest, NextResponse} from 'next/server';
-import {locales, routing} from '@/i18n/routing';
+import { NextRequest, NextResponse } from 'next/server';
+import { getToken } from 'next-auth/jwt';
+import { locales, routing } from '@/i18n/routing';
+import { NEXTAUTH_SECRET_VALUE } from '@adapters/auth/nextauth';
 
 const defaultLocale = 'en';
 
 // Create the next-intl middleware with the routing configuration
 const intlMiddleware = createMiddleware(routing);
 
-export default function middleware(request: NextRequest) {
+export default async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+
+  if (pathname.startsWith('/keystatic') || pathname.startsWith('/api/keystatic')) {
+    const token = await getToken({ req: request, secret: NEXTAUTH_SECRET_VALUE });
+    const isAdmin = Boolean(token && typeof token === 'object' && 'isAdmin' in token && (token as any).isAdmin);
+
+    if (!isAdmin) {
+      if (pathname.startsWith('/api/keystatic')) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+
+      const loginUrl = new URL('/admin/login', request.url);
+      return NextResponse.redirect(loginUrl);
+    }
+
+    return NextResponse.next();
+  }
 
   // Check if pathname is for API routes, static files, or special Next.js paths
   const shouldNotRedirect =
@@ -19,7 +37,7 @@ export default function middleware(request: NextRequest) {
     pathname.startsWith('/favicon');
 
   if (shouldNotRedirect) {
-    return;
+    return NextResponse.next();
   }
 
   // Check if the pathname already includes a locale
@@ -58,5 +76,5 @@ export default function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/', '/(en|ar)/:path*']
+  matcher: ['/', '/(en|ar)/:path*', '/keystatic/:path*', '/api/keystatic/:path*']
 };

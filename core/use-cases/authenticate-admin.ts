@@ -26,11 +26,17 @@ export const authenticateAdmin = async (
   const password = input.password;
 
   if (!username || !password) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn('[auth] missing username or password');
+    }
     return null;
   }
 
   const user = await deps.adminUserRepository.findByUsername(username);
   if (!user || !user.isAdmin) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn('[auth] user not found or not admin', { username });
+    }
     return null;
   }
 
@@ -41,6 +47,9 @@ export const authenticateAdmin = async (
   );
 
   if (!isValid) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.warn('[auth] invalid credentials', { username });
+    }
     return null;
   }
 

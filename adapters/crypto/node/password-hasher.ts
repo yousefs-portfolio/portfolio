@@ -1,9 +1,7 @@
-import { randomBytes, scrypt as scryptCallback, timingSafeEqual } from 'node:crypto';
-import { promisify } from 'node:util';
+import { randomBytes, scryptSync, timingSafeEqual } from 'crypto';
 
 import type { PasswordHasher } from '@core/interfaces/crypto';
 
-const scrypt = promisify(scryptCallback);
 const SALT_BYTES = 16;
 const KEY_LENGTH = 64;
 
@@ -11,9 +9,9 @@ export class NodePasswordHasher implements PasswordHasher {
   async hash(password: string, salt?: string): Promise<{ hash: string; salt: string }> {
     const resolvedSalt = salt ?? randomBytes(SALT_BYTES).toString('hex');
     const saltBuffer = Buffer.from(resolvedSalt, 'hex');
-    const derived = await scrypt(password, saltBuffer, KEY_LENGTH);
+    const derived = scryptSync(password, saltBuffer, KEY_LENGTH);
     return {
-      hash: (derived as Buffer).toString('hex'),
+      hash: derived.toString('hex'),
       salt: resolvedSalt,
     };
   }

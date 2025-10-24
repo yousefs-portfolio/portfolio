@@ -3,10 +3,24 @@ import Credentials from 'next-auth/providers/credentials';
 
 import { authenticateAdmin } from '@core/use-cases/authenticate-admin';
 
+import { env } from '@config/env';
 import { prismaAdminUserRepository } from '../db/prisma/admin-user.repository';
 import { passwordHasher } from '../crypto/node/password-hasher';
 
+const resolveNextAuthSecret = (): string => {
+  if (env.NEXTAUTH_SECRET) {
+    return env.NEXTAUTH_SECRET;
+  }
+  if (env.NODE_ENV === 'production') {
+    throw new Error('NEXTAUTH_SECRET environment variable must be set in production.');
+  }
+  return 'development-only-nextauth-secret';
+};
+
+export const NEXTAUTH_SECRET_VALUE = resolveNextAuthSecret();
+
 export const authOptions: NextAuthOptions = {
+  secret: NEXTAUTH_SECRET_VALUE,
   pages: {
     signIn: '/admin/login',
   },
@@ -63,3 +77,14 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       session.user = {
+        id: (token.id as string) ?? session.user?.id ?? '',
+        name: token.name ?? session.user?.name ?? null,
+        email: token.email ?? session.user?.email ?? null,
+        username: (token.username as string | undefined) ?? session.user?.username,
+        isAdmin: Boolean(token.isAdmin),
+        mustChangePassword: Boolean(token.mustChangePassword),
+      };
+      return session;
+    },
+  },
+};
