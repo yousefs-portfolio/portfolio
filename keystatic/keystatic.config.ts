@@ -8,7 +8,7 @@ export default config({
     posts: collection({
       label: 'Blog Posts',
       slugField: 'title',
-      path: 'keystatic/content/posts/*',
+      path: 'content/posts/*',
       format: { contentField: 'content' },
       schema: {
         title: fields.slug({ 
@@ -74,7 +74,7 @@ export default config({
     projects: collection({
       label: 'Projects',
       slugField: 'title',
-      path: 'keystatic/content/projects/*',
+      path: 'content/projects/*',
       format: { contentField: 'description' },
       schema: {
         title: fields.slug({ 
@@ -152,7 +152,7 @@ export default config({
     services: collection({
       label: 'Services',
       slugField: 'title',
-      path: 'keystatic/content/services/*',
+      path: 'content/services/*',
       format: { contentField: 'description' },
       schema: {
         title: fields.slug({ 
@@ -189,7 +189,7 @@ export default config({
   singletons: {
     homepage: singleton({
       label: 'Homepage',
-      path: 'keystatic/content/homepage',
+      path: 'content/homepage',
       schema: {
         heroTitle1: fields.text({ 
           label: 'Hero Title Line 1',
@@ -243,7 +243,7 @@ export default config({
     }),
     settings: singleton({
       label: 'Site Settings',
-      path: 'keystatic/content/settings',
+      path: 'content/settings',
       schema: {
         siteName: fields.text({ 
           label: 'Site Name',

@@ -17,10 +17,7 @@ const BodySchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions).catch((error) => {
-      console.error('[auth] failed to read session', error);
-      return null;
-    });
+    const session = await getServerSession(authOptions);
 
     if (!session?.user?.isAdmin) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
