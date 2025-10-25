@@ -8,8 +8,7 @@ import {db} from '@/drizzle/db';
 import {contacts} from '@/drizzle/schema';
 
 type ContactRecord = typeof contacts.$inferSelect;
-type TransactionClient = Parameters<Parameters<DrizzleDb["transaction"]>[0]>[0];
-type ContactClient = DrizzleDb | TransactionClient;
+type ContactClient = DrizzleDb;
 
 const mapContact = (record: ContactRecord): Contact => ({
     id: record.id,

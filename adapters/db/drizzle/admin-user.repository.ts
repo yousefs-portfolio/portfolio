@@ -8,8 +8,7 @@ import {db} from '@/drizzle/db';
 import {users} from '@/drizzle/schema';
 
 type UserRecord = typeof users.$inferSelect;
-type TransactionClient = Parameters<Parameters<DrizzleDb["transaction"]>[0]>[0];
-type UserClient = DrizzleDb | TransactionClient;
+type UserClient = DrizzleDb;
 
 const mapAdminUser = (record: UserRecord): AdminUser => ({
     id: record.id,
