@@ -1,20 +1,7 @@
 import type {Metadata} from "next";
 import {NextIntlClientProvider} from 'next-intl';
-import {Almarai, Inter} from 'next/font/google';
 import "../globals.css";
 import AuthProvider from '@/components/AuthProvider';
-
-const inter = Inter({
-    subsets: ['latin'],
-    weight: ['400', '700', '900'],
-    display: 'swap',
-});
-
-const almarai = Almarai({
-    subsets: ['arabic'],
-    weight: ['300', '400', '700', '800'],
-    display: 'swap',
-});
 
 export const metadata: Metadata = {
   title: "Yousef Baitalmal | Visionary Engineer & Creator",
@@ -50,7 +37,7 @@ export default async function LocaleLayout({
     <html lang={locale} dir={isRTL ? 'rtl' : 'ltr'}>
     <body
         suppressHydrationWarning={true}
-        className={isRTL ? almarai.className : inter.className}
+        className={isRTL ? 'font-almarai' : 'font-comfortaa'}
     >
       <AuthProvider>
         <NextIntlClientProvider locale={locale} messages={messages}>

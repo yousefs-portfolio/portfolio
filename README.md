@@ -349,3 +349,16 @@ Project Link: [https://github.com/yousefs-portfolio/portfolio](https://github.co
   <p>Built with ❤️ using Next.js, Three.js, and modern web technologies</p>
   <p>⭐ Star this repository if you find it helpful!</p>
 </div>
+
+## Cloud SQL Environment
+
+Set these env vars when running on Cloud Run (see Google Cloud Console):
+
+- `INSTANCE_CONNECTION_NAME=portfolio-476219:me-central1:pg-main`
+- `PGUSER=dev_user`
+- `PGPASSWORD=REPLACE_WITH_STRONG_DEV`
+- `PGDATABASE=app_dev`
+- `NODE_ENV=production`
+
+You can verify connectivity after deployment by visiting `/api/db/health`, which returns JSON status for the Cloud SQL
+connection.

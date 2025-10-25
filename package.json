@@ -20,6 +20,7 @@
     "db:seed": "tsx scripts/db/seed.ts"
   },
   "dependencies": {
+    "@google-cloud/cloud-sql-connector": "^1.8.4",
     "@keystatic/core": "^0.5.48",
     "@keystatic/next": "^5.0.4",
     "@paralleldrive/cuid2": "^3.1.0",
@@ -31,6 +32,7 @@
     "next": "15.5.2",
     "next-auth": "^4.24.7",
     "next-intl": "^4.3.6",
+    "pg": "^8.16.3",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-markdown": "^10.1.0",
@@ -45,6 +47,7 @@
     "@tailwindcss/postcss": "^4",
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^20",
+    "@types/pg": "^8.15.5",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@typescript-eslint/eslint-plugin": "^8.18.1",
