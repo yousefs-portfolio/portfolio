@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 
-import { prismaContactRepository } from '@adapters/db/prisma/contact.repository';
-import { prismaTx } from '@adapters/db/prisma/transaction';
+import {drizzleContactRepository} from '@adapters/db/drizzle/contact.repository';
+import {drizzleTx} from '@adapters/db/drizzle/transaction';
 import { createContact } from '@core/use-cases/create-contact';
 import { listContacts } from '@core/use-cases/list-contacts';
 import { UseCaseError } from '@core/lib/errors';
@@ -27,8 +27,8 @@ export async function POST(request: NextRequest) {
     }
 
     const contact = await createContact(parsed.data, {
-      contactRepository: prismaContactRepository,
-      tx: prismaTx,
+        contactRepository: drizzleContactRepository,
+        tx: drizzleTx,
     });
 
     return NextResponse.json(
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   try {
     const contacts = await listContacts({
-      contactRepository: prismaContactRepository,
+        contactRepository: drizzleContactRepository,
     });
 
     return NextResponse.json(

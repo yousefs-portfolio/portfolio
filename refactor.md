@@ -57,7 +57,7 @@ Here’s a copy-pasteable **Codex-style refactor prompt** for a **Next.js + Post
 
   adapters/                    # frameworks & I/O implementations
     db/
-      prisma/                  # or drizzle/pg
+      drizzle/                 # or prisma/pg
         client.ts
         post.repository.ts     # implements ports.repositories
         transaction.ts         # implements tx port
@@ -83,7 +83,7 @@ Here’s a copy-pasteable **Codex-style refactor prompt** for a **Next.js + Post
     keystatic.config.ts
     content/
 
-  prisma/ | drizzle/           # schema/migrations if applicable
+  drizzle/ | prisma/           # schema/migrations if applicable
   package.json
   tsconfig.json
   next.config.js

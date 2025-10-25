@@ -1,12 +1,13 @@
-import type { NextAuthOptions } from 'next-auth';
+import type {AuthOptions, Session, User} from 'next-auth';
+import type {JWT} from 'next-auth/jwt';
 import Credentials from 'next-auth/providers/credentials';
 
 import { authenticateAdmin } from '@core/use-cases/authenticate-admin';
 
-import { prismaAdminUserRepository } from '../db/prisma/admin-user.repository';
+import {drizzleAdminUserRepository} from '../db/drizzle/admin-user.repository';
 import { passwordHasher } from '../crypto/node/password-hasher';
 
-export const authOptions: NextAuthOptions = {
+export const authOptions: AuthOptions = {
   pages: {
     signIn: '/admin/login',
   },
@@ -31,7 +32,7 @@ export const authOptions: NextAuthOptions = {
             password: credentials.password,
           },
           {
-            adminUserRepository: prismaAdminUserRepository,
+              adminUserRepository: drizzleAdminUserRepository,
             passwordHasher,
           },
         );
@@ -52,14 +53,26 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+      async jwt({token, user}: { token: JWT; user?: User | null }) {
       if (user) {
-        token.id = (user as any).id ?? token.id;
-        token.username = (user as any).username ?? token.username;
-        token.isAdmin = (user as any).isAdmin ?? token.isAdmin;
-        token.mustChangePassword = (user as any).mustChangePassword ?? token.mustChangePassword;
+          const admin = user as User;
+          token.id = admin.id ?? token.id;
+          token.username = admin.username ?? token.username;
+          token.isAdmin = admin.isAdmin ?? token.isAdmin;
+          token.mustChangePassword = admin.mustChangePassword ?? token.mustChangePassword;
       }
       return token;
     },
-    async session({ session, token }) {
+      async session({session, token}: { session: Session; token: JWT }) {
       session.user = {
+          id: (token.id as string) ?? session.user?.id ?? '',
+          name: token.name ?? session.user?.name ?? null,
+          email: token.email ?? session.user?.email ?? null,
+          username: (token.username as string | undefined) ?? session.user?.username,
+          isAdmin: Boolean(token.isAdmin),
+          mustChangePassword: Boolean(token.mustChangePassword),
+      };
+          return session;
+      },
+  },
+};

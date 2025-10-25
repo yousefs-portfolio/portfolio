@@ -43,7 +43,8 @@ const readProjectFile = async (slug: string): Promise<Project | null> => {
       return null;
     }
 
-    const [, frontMatterRaw, contentRaw] = match;
+      const frontMatterRaw = match[1] ?? '';
+      const contentRaw = match[2] ?? '';
     const frontMatter = parseFrontMatter(frontMatterRaw);
     const rawTitle = frontMatter.title;
     const title =

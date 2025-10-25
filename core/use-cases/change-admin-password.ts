@@ -25,17 +25,17 @@ export const changeAdminPassword = async (
     );
   }
 
+    const hashed = await deps.passwordHasher.hash(newPassword);
+
   const update = async (repo: AdminUserRepository) => {
     const user = await repo.findById(input.userId);
     if (!user || !user.isAdmin) {
       throw new UseCaseError('UNAUTHORIZED', 'Only admins may change password');
     }
 
-    const { hash, salt } = await deps.passwordHasher.hash(newPassword);
-
     await repo.updatePassword(user.id, {
-      hash,
-      salt,
+        hash: hashed.hash,
+        salt: hashed.salt,
       mustChangePassword: false,
     });
   };

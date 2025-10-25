@@ -63,7 +63,8 @@ const readPostFile = async (slug: string): Promise<Post | null> => {
       };
     }
 
-    const [, frontMatterRaw, contentRaw] = match;
+      const frontMatterRaw = match[1] ?? '';
+      const contentRaw = match[2] ?? '';
     const frontMatter = parseFrontMatter(frontMatterRaw);
 
     const rawTitle = frontMatter.title;

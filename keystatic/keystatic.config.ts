@@ -2,7 +2,7 @@ import { config, fields, collection, singleton } from '@keystatic/core';
 
 export default config({
   storage: {
-    kind: process.env.NODE_ENV === 'production' ? 'github' : 'local',
+      kind: 'local',
   },
   collections: {
     posts: collection({

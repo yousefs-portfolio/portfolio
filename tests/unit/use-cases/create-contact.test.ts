@@ -25,7 +25,8 @@ describe('createContact use-case', () => {
   });
 
   it('trims and forwards data to the repository', async () => {
-    const createMock = vi.fn<[], Promise<Contact>>().mockResolvedValue({
+      const createMock = vi.fn<() => Promise<Contact>>();
+      createMock.mockResolvedValue({
       id: 'contact-1',
       name: 'Jane Doe',
       email: 'jane@example.com',

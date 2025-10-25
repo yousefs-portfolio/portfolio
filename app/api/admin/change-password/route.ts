@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { z } from 'zod';
 
-import { prismaAdminUserRepository } from '@adapters/db/prisma/admin-user.repository';
-import { prismaTx } from '@adapters/db/prisma/transaction';
+import {drizzleAdminUserRepository} from '@adapters/db/drizzle/admin-user.repository';
+import {drizzleTx} from '@adapters/db/drizzle/transaction';
 import { passwordHasher } from '@adapters/crypto/node/password-hasher';
 import { authOptions } from '@adapters/auth/nextauth';
 import { changeAdminPassword } from '@core/use-cases/change-admin-password';
@@ -45,9 +45,9 @@ export async function POST(request: NextRequest) {
         newPassword: parsed.data.newPassword,
       },
       {
-        adminUserRepository: prismaAdminUserRepository,
+          adminUserRepository: drizzleAdminUserRepository,
         passwordHasher,
-        tx: prismaTx,
+          tx: drizzleTx,
       },
     );
 

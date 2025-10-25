@@ -1,8 +1,12 @@
 'use client'
 
+import type {Mesh, MeshBasicMaterial, PointsMaterial} from 'three';
+
 import {useEffect, useRef} from 'react'
 import {gsap} from 'gsap'
 import {ScrollTrigger} from 'gsap/ScrollTrigger'
+
+type ThreeModule = typeof import('three');
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -17,7 +21,7 @@ export default function ThreeBackground() {
     let animationId: number
 
     // Import Three.js dynamically to avoid SSR issues
-    import('three').then((THREE) => {
+      import('three').then((THREE: ThreeModule) => {
       // Core Three.js Setup
       const scene = new THREE.Scene()
       const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000)
@@ -31,7 +35,7 @@ export default function ThreeBackground() {
       
       // Create Arabic letters using canvas textures
       const arabicLetters = ['س', 'ص', 'م', 'ع', 'ن', 'ر', 'ق', 'ل', 'ك', 'ي']
-      const letterMeshes: THREE.Mesh[] = []
+          const letterMeshes: Mesh[] = []
       
       // Create letter meshes using canvas texture
       function createArabicLetter(letter: string, size: number = 2, color: string) {
@@ -73,7 +77,7 @@ export default function ThreeBackground() {
       // Create Arabic letters in the space between hero and first project
       // These replace the old wireframe boxes
       for (let i = 0; i < 30; i++) {  // Increased count for better coverage
-        const letter = arabicLetters[Math.floor(Math.random() * arabicLetters.length)]
+          const letter = arabicLetters[Math.floor(Math.random() * arabicLetters.length)] ?? 'س'
         // Use purple color like the old wireframe boxes
         const mesh = createArabicLetter(letter, Math.random() * 2 + 1.5, 'rgba(159, 122, 234, 0.8)')
 
@@ -116,8 +120,8 @@ export default function ThreeBackground() {
       }
       const particlesGeometry = new THREE.BufferGeometry()
       particlesGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
-      
-      const particlesMaterial = new THREE.PointsMaterial({
+
+          const particlesMaterial: PointsMaterial = new THREE.PointsMaterial({
         map: createParticleTexture(),
         color: 0x4A55A2, // Navy Blue
         size: 0.3,
@@ -135,8 +139,9 @@ export default function ThreeBackground() {
       arabicLettersGroup.position.z = -25  // Start further back to prevent initial overlap
       arabicLettersGroup.visible = false  // Start hidden
       // Set initial opacity for all letter materials
-      letterMeshes.forEach(mesh => {
-        mesh.material.opacity = 0
+          letterMeshes.forEach((mesh) => {
+              const material = mesh.material as MeshBasicMaterial;
+              material.opacity = 0;
       })
 
       // Keep voxels for the third layer
@@ -218,7 +223,7 @@ export default function ThreeBackground() {
                 particlesMaterial.opacity = Math.max(0, 1 - transitionProgress * 1.5)
 
                 letterMeshes.forEach(mesh => {
-                  mesh.material.opacity = 0.6 * transitionProgress
+                    (mesh.material as MeshBasicMaterial).opacity = 0.6 * transitionProgress
                 })
 
                 if (transitionProgress > 0.9) {
@@ -232,7 +237,7 @@ export default function ThreeBackground() {
 
                 const transitionProgress = (progress - 0.6) / 0.25
                 letterMeshes.forEach(mesh => {
-                  mesh.material.opacity = Math.max(0.1, 0.6 * (1 - transitionProgress))
+                    (mesh.material as MeshBasicMaterial).opacity = Math.max(0.1, 0.6 * (1 - transitionProgress))
                 })
 
                 if (transitionProgress > 0.9) {

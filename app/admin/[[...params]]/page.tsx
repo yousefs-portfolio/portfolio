@@ -1,12 +1,14 @@
+import type {JSX} from 'react';
+
 import {redirect} from 'next/navigation'
-import {getServerSession} from 'next-auth'
+import {getServerSession} from 'next-auth/next'
 import {makePage} from '@keystatic/next/ui/app'
 
 import config from '@/keystatic/keystatic.config'
 import AdminChangePasswordForm from '@/components/AdminChangePasswordForm'
 import {authOptions} from '@adapters/auth/nextauth'
 
-const KeystaticApp = makePage(config)
+const KeystaticApp = makePage(config) as unknown as (props: { params: string[] }) => JSX.Element;
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -32,6 +34,6 @@ export default async function AdminPage({params}: AdminPageProps) {
     )
   }
 
-  const keystaticParams = { params: params.params ?? [] }
+    const keystaticParams = params.params ?? []
   return <KeystaticApp params={keystaticParams} />
 }

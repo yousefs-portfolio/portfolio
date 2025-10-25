@@ -35,7 +35,7 @@
 ### 🏗️ **Modern Architecture**
 - **Next.js 15 App Router**: Latest routing system with server components
 - **Turbopack**: Lightning-fast builds and hot module replacement
-- **Prisma ORM**: Type-safe database access with SQLite
+- **Drizzle ORM**: Type-safe database access with SQLite
 - **RESTful API**: Full CRUD operations for dynamic content management
 
 ### 🌐 **Bilingual Support** ✅
@@ -57,7 +57,7 @@
 - **Code Splitting**: Automatic code splitting for optimal loading
 - **Image Optimization**: Next.js Image component with lazy loading
 - **CSS-in-JS**: Tailwind CSS for minimal runtime overhead
-- **Database Caching**: Efficient query patterns with Prisma
+- **Database Caching**: Efficient query patterns with Drizzle
 
 ---
 
@@ -73,7 +73,7 @@
 
 ### **Backend**
 - **Runtime**: [Node.js](https://nodejs.org/)
-- **ORM**: [Prisma](https://www.prisma.io/)
+- **ORM**: [Drizzle ORM](https://orm.drizzle.team/)
 - **Database**: SQLite (Development) / PostgreSQL (Production-ready)
 - **API**: RESTful endpoints with Next.js API Routes
 
@@ -112,7 +112,7 @@
 
 4. **Seed the database**
    ```bash
-   node prisma/seed.js
+   npm run db:seed
    ```
 
 5. **Start the development server**
@@ -127,20 +127,22 @@
 
 ### Development Commands
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start development server with Turbopack |
-| `npm run build` | Build for production |
-| `npm start` | Start production server |
-| `npm run lint` | Run ESLint |
-| `npm run typecheck` | Run TypeScript in strict no-emit mode |
-| `npm run test` | Execute unit tests with Vitest |
-| `npm run format` | Check formatting with Prettier |
-| `npm run format:fix` | Format all files with Prettier |
-| `npm run e2e` | Execute Playwright test suite |
-| `npm run ci` | Run linting, type-checking, and unit tests |
-| `npm run db:push` | Push Prisma schema to database |
-| `npm run db:studio` | Open Prisma Studio GUI |
+| Command               | Description                                    |
+|-----------------------|------------------------------------------------|
+| `npm run dev`         | Start development server with Turbopack        |
+| `npm run build`       | Build for production                           |
+| `npm start`           | Start production server                        |
+| `npm run lint`        | Run ESLint                                     |
+| `npm run typecheck`   | Run TypeScript in strict no-emit mode          |
+| `npm run test`        | Execute unit tests with Vitest                 |
+| `npm run format`      | Check formatting with Prettier                 |
+| `npm run format:fix`  | Format all files with Prettier                 |
+| `npm run e2e`         | Execute Playwright test suite                  |
+| `npm run ci`          | Run linting, type-checking, and unit tests     |
+| `npm run db:push`     | Apply Drizzle schema changes (push migrations) |
+| `npm run db:generate` | Generate SQL migrations from schema            |
+| `npm run db:studio`   | Explore the database with Drizzle Studio       |
+| `npm run db:seed`     | Seed SQLite with demo content                  |
 
 ---
 
@@ -156,7 +158,7 @@ portfolio/
 ├── adapters/                     # Framework & I/O implementations (outer layer)
 │   ├── auth/nextauth.ts          # NextAuth wiring via use-cases
 │   ├── content/keystatic/        # Keystatic-backed content readers
-│   └── db/prisma/                # Prisma repositories + transaction adapter
+│   └── db/drizzle/               # Drizzle repositories + transaction adapter
 ├── core/                         # Clean Architecture center (pure TypeScript)
 │   ├── domain/                   # Entities/value objects
 │   ├── interfaces/               # Ports consumed by use-cases
@@ -166,7 +168,7 @@ portfolio/
 ├── keystatic/
 │   ├── keystatic.config.ts       # Keystatic configuration
 │   └── content/                  # Markdown/Markdoc content managed by Keystatic
-├── prisma/                       # Schema, migrations, and seeds
+├── drizzle/                      # Schema definitions and migrations
 ├── tests/
 │   └── unit/                     # Use-case unit tests (Vitest)
 ├── public/                       # Static assets
@@ -180,67 +182,44 @@ portfolio/
 1. Model the behaviour in `core/domain` (entities/value objects) if new types are needed.
 2. Define/extend the required ports in `core/interfaces`.
 3. Implement the orchestration in `core/use-cases/<feature>.ts` returning plain data.
-4. Provide an adapter in `adapters/*` that satisfies the new port (Prisma, Keystatic, etc.).
+4. Provide an adapter in `adapters/*` that satisfies the new port (Drizzle, Keystatic, etc.).
 5. Call the use-case from an API route or server action in `app/`, validating inputs with Zod.
 6. Add targeted unit tests under `tests/unit/use-cases`.
 
 ### Database Schema
 
-```prisma
-model Project {
-  id          String   @id @default(cuid())
-  title       String
-  description String?
-  content     String?
-  layer       String?
-  layerName   String?
-  featured    Boolean  @default(false)
-  order       Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
+```ts
+import { createId } from '@paralleldrive/cuid2';
+import { sql } from 'drizzle-orm';
+import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
-model BlogPost {
-  id        String   @id @default(cuid())
-  title     String
-  slug      String   @unique
-  content   String
-  excerpt   String?
-  published Boolean  @default(false)
-  featured  Boolean  @default(false)
-  author    User?    @relation(fields: [authorId], references: [id])
-  authorId  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
+export const contacts = sqliteTable('contacts', {
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => createId()),
+  name: text('name').notNull(),
+  email: text('email'),
+  whatsapp: text('whatsapp'),
+  requirements: text('requirements').notNull(),
+  createdAt: text('createdAt')
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
+});
 
-model Service {
-  id          String   @id @default(cuid())
-  title       String
-  description String?
-  featured    Boolean  @default(false)
-  order       Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-model Contact {
-  id        String   @id @default(cuid())
-  name      String
-  email     String
-  message   String
-  createdAt DateTime @default(now())
-}
-
-model User {
-  id        String     @id @default(cuid())
-  email     String     @unique
-  name      String?
-  isAdmin   Boolean    @default(false)
-  posts     BlogPost[]
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-}
+export const users = sqliteTable('users', {
+  id: text('id')
+    .primaryKey()
+    .$defaultFn(() => createId()),
+  username: text('username').notNull(),
+  email: text('email'),
+  name: text('name'),
+  passwordHash: text('passwordHash').notNull(),
+  passwordSalt: text('passwordSalt').notNull(),
+  mustChangePassword: integer('mustChangePassword', { mode: 'boolean' })
+    .notNull()
+    .default(true),
+  isAdmin: integer('isAdmin', { mode: 'boolean' }).notNull().default(false),
+});
 ```
 
 ---
@@ -290,7 +269,7 @@ Create a `.env.local` file for local development:
 
 ```env
 # Database
-DATABASE_URL="file:./dev.db"
+DATABASE_URL="file:./drizzle/dev.db"
 
 # Admin (for production)
 ADMIN_PASSWORD="your-secure-password"

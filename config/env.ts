@@ -12,6 +12,6 @@ let cachedEnv: Env | undefined;
 
 export const env: Env = (cachedEnv ??= EnvSchema.parse({
   NODE_ENV: process.env.NODE_ENV,
-  DATABASE_URL: process.env.DATABASE_URL ?? 'file:./dev.db',
+    DATABASE_URL: process.env.DATABASE_URL ?? 'file:./drizzle/dev.db',
   NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
 }));

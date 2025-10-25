@@ -89,9 +89,7 @@ export default function BlogPostPage() {
   const postContent = isArabic && post.contentAr ? post.contentAr : post.content
 
   // Convert Markdoc content to markdown string if needed
-  const contentString = typeof postContent === 'string'
-    ? postContent
-    : postContent?.children?.[0]?.children || ''
+    const contentString = typeof postContent === 'string' ? postContent : ''
 
   return (
     <div className="min-h-screen bg-black text-white" dir={isArabic ? 'rtl' : 'ltr'}>
