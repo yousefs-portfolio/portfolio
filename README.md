@@ -9,55 +9,49 @@
 <div align="center">
   <h1>🚀 Portfolio | Yousef Baitalmal</h1>
   <p><strong>Engineering from First Principles</strong></p>
-  <p>A cutting-edge portfolio showcasing systems engineering, creative coding, and full-stack development through an immersive 3D journey.</p>
+  <p>A production-grade portfolio and admin platform built around clean architecture, multilingual content, and immersive 3D storytelling.</p>
 </div>
 
 <div align="center">
   <a href="#features">Features</a> •
   <a href="#tech-stack">Tech Stack</a> •
   <a href="#quick-start">Quick Start</a> •
-  <a href="#architecture">Architecture</a> •
-  <a href="#api">API</a> •
-  <a href="#deployment">Deployment</a>
+  <a href="#architecture">Architecture</a>
 </div>
 
 ---
 
 ## ✨ Features
 
-### 🎨 **Immersive 3D Experience**
-- **3D Arabic Letters**: Floating Arabic characters (س, ص, م, ع, ن, ر, ق, ل, ك, ي) that move with scroll
-- **Optimized Particle System**: 1,500 particles creating an atmospheric background
-- **Scroll-Triggered Animations**: GSAP-powered animations that respond to user scrolling
-- **Dynamic Voxel World**: 3D voxels in the final layer representing the game engine
-- **Responsive 3D Canvas**: Adapts seamlessly to all screen sizes
+### 🎨 Immersive 3D Storytelling
 
-### 🏗️ **Modern Architecture**
-- **Next.js 15 App Router**: Latest routing system with server components
-- **Turbopack**: Lightning-fast builds and hot module replacement
-- **Drizzle ORM**: Type-safe database access with SQLite
-- **RESTful API**: Full CRUD operations for dynamic content management
+- Scroll-driven Three.js narrative spanning language → framework → immersive experience.
+- Arabic letter particle field and voxel world animated with GSAP.
+- Responsive canvas with graceful fallbacks for low-powered devices.
 
-### 🌐 **Bilingual Support** ✅
-- **English/Arabic**: Full RTL support with seamless language switching
-- **Browser Language Detection**: Automatically detects and sets user's preferred language
-- **Dynamic Translations**: All UI content available in both languages
-- **Persistent Language Choice**: Remembers user's language preference
-- **RTL Layout**: Complete right-to-left layout support for Arabic
+### 🧱 Layered Content Architecture
 
-### 📝 **Content Management**
-- **Admin Dashboard**: Password-protected admin interface for content management
-- **Keystatic CMS**: Built-in headless CMS with visual editor for content creation
-- **Dynamic Projects**: Database-driven project sections with Seen (س), Summon, and Hearthshire
-- **Blog System**: Built-in blog with full CRUD operations
-- **Contact Form**: Secure contact form with database storage (no email exposure)
-- **Services Management**: Dynamic services showcase with modal presentation
+- App Router, Server Components, and Server Actions with clear controller boundaries.
+- Keystatic-powered admin for managing projects, services, and blog posts.
+- REST API endpoints for future integrations (`/api/projects`, `/api/blog`, `/api/contact`, ...).
 
-### 🎯 **Performance Optimized**
-- **Code Splitting**: Automatic code splitting for optimal loading
-- **Image Optimization**: Next.js Image component with lazy loading
-- **CSS-in-JS**: Tailwind CSS for minimal runtime overhead
-- **Database Caching**: Efficient query patterns with Drizzle
+### 🌍 Full Internationalization
+
+- English ↔ Arabic toggle with persistent preference and auto-detection.
+- RTL-aware typography via utility classes (`font-comfortaa`, `font-almarai`).
+- Bilingual Markdoc content surfaced through shared use-cases.
+
+### 🔐 Production-Ready Platform
+
+- NextAuth admin auth with enforced password rotation.
+- Cloud Run + Cloud SQL deploy targets, including `/api/db/health` probe.
+- Strict TypeScript, ESLint, Vitest, and Playwright-ready scaffolding.
+
+### 🪪 Clean Architecture Enforcement
+
+- `core/` holds domain entities, interfaces, and use-cases (no framework imports).
+- `adapters/` implements infrastructure (Drizzle/Postgres, Keystatic, auth).
+- Routes/controllers validate inputs and map results across layers.
 
 ---
 
@@ -324,41 +318,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
----
-
-## 📧 Contact
-
-**Yousef Baitalmal**  
-Visit the [portfolio website](https://github.com/yousefs-portfolio/portfolio) and use the contact form to get in touch.
-
-Project Link: [https://github.com/yousefs-portfolio/portfolio](https://github.com/yousefs-portfolio/portfolio)
-
----
-
-<div align="center">
-  <p>Built with ❤️ using Next.js, Three.js, and modern web technologies</p>
-  <p>⭐ Star this repository if you find it helpful!</p>
-</div>
-
-## Cloud SQL Environment
-
-Set these env vars when running on Cloud Run (see Google Cloud Console):
-
-- `INSTANCE_CONNECTION_NAME=portfolio-476219:me-central1:pg-main`
-- `PGUSER=dev_user`
-- `PGPASSWORD=REPLACE_WITH_STRONG_DEV`
-- `PGDATABASE=app_dev`
-- `NODE_ENV=production`
-
-You can verify connectivity after deployment by visiting `/api/db/health`, which returns JSON status for the Cloud SQL
-connection.
