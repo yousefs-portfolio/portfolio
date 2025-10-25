@@ -1,0 +1,116 @@
+name: Deploy to Cloud Run (dev/uat/prod)
+
+on:
+  push:
+    branches: [ dev, uat, main ]
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  REGION: ${{ secrets.REGION }}
+  PROJECT_ID: ${{ secrets.PROJECT_ID }}
+  ARTIFACT_REPO: ${{ secrets.ARTIFACT_REPO }}
+  INSTANCE_CONNECTION_NAME: ${{ secrets.INSTANCE_CONNECTION_NAME }}
+  NODE_VERSION: ${{ secrets.NODE_VERSION || '20' }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: deploy-${{ github.ref_name }}
+      cancel-in-progress: false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # 1) Auth to GCP with OIDC (no keys)
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDP }}
+          service_account: ${{ secrets.GCP_SA_EMAIL }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker $REGION-docker.pkg.dev
+
+      - name: Map branch -> env
+        id: envmap
+        run: |
+          ref="${GITHUB_REF##*/}"
+          if [ "$ref" = "dev" ]; then
+            echo "ENV=dev" >> $GITHUB_OUTPUT
+            echo "SERVICE=next-dev" >> $GITHUB_OUTPUT
+            echo "PGUSER=dev_user" >> $GITHUB_OUTPUT
+            echo "PGDATABASE=app_dev" >> $GITHUB_OUTPUT
+            echo "PGPASSWORD=${{ secrets.PG_PASSWORD_DEV }}" >> $GITHUB_OUTPUT
+            echo "NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET_DEV }}" >> $GITHUB_OUTPUT
+          elif [ "$ref" = "uat" ]; then
+            echo "ENV=uat" >> $GITHUB_OUTPUT
+            echo "SERVICE=next-uat" >> $GITHUB_OUTPUT
+            echo "PGUSER=uat_user" >> $GITHUB_OUTPUT
+            echo "PGDATABASE=app_uat" >> $GITHUB_OUTPUT
+            echo "PGPASSWORD=${{ secrets.PG_PASSWORD_UAT }}" >> $GITHUB_OUTPUT
+            echo "NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET_UAT }}" >> $GITHUB_OUTPUT
+          else
+            echo "ENV=prod" >> $GITHUB_OUTPUT
+            echo "SERVICE=next-prod" >> $GITHUB_OUTPUT
+            echo "PGUSER=prod_user" >> $GITHUB_OUTPUT
+            echo "PGDATABASE=app_prod" >> $GITHUB_OUTPUT
+            echo "PGPASSWORD=${{ secrets.PG_PASSWORD_PROD }}" >> $GITHUB_OUTPUT
+            echo "NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET_PROD }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build & push image
+        run: |
+          IMAGE="$REGION-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPO/next-app:${{ steps.envmap.outputs.ENV }}"
+          docker build -t "$IMAGE" .
+          docker push "$IMAGE"
+
+      # 2) Run Drizzle migrations via Cloud SQL Auth Proxy
+      - name: Download Cloud SQL Auth Proxy
+        run: |
+          curl -sLo cloud-sql-proxy https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.12.0/cloud-sql-proxy.linux.amd64
+          chmod +x cloud-sql-proxy
+
+      - name: Start Proxy
+        run: ./cloud-sql-proxy "${{ env.INSTANCE_CONNECTION_NAME }}" --port 5432 &
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install deps & run migrations
+        env:
+          PGPASSWORD: ${{ steps.envmap.outputs.PGPASSWORD }}
+          PGUSER: ${{ steps.envmap.outputs.PGUSER }}
+          PGDATABASE: ${{ steps.envmap.outputs.PGDATABASE }}
+          DATABASE_URL: postgresql://${{ steps.envmap.outputs.PGUSER }}:${{ steps.envmap.outputs.PGPASSWORD }}@127.0.0.1:5432/${{ steps.envmap.outputs.PGDATABASE }}
+        run: |
+          corepack enable || true
+          if [ -f pnpm-lock.yaml ]; then corepack prepare pnpm@latest --activate; pnpm i --frozen-lockfile; \
+          elif [ -f yarn.lock ]; then yarn --frozen-lockfile; \
+          else npm ci; fi
+          npx drizzle-kit migrate
+
+      # 3) Compute service URL & deploy (sets NEXTAUTH_URL + SECRET)
+      - name: Get Project Number
+        id: projnum
+        run: echo "NUM=$(gcloud projects describe $PROJECT_ID --format='value(projectNumber)')" >> $GITHUB_OUTPUT
+
+      - name: Deploy to Cloud Run
+        run: |
+          IMAGE="$REGION-docker.pkg.dev/$PROJECT_ID/$ARTIFACT_REPO/next-app:${{ steps.envmap.outputs.ENV }}"
+          SERVICE="${{ steps.envmap.outputs.SERVICE }}"
+          SERVICE_URL="https://${SERVICE}-${{ steps.projnum.outputs.NUM }}.${REGION}.run.app"
+          gcloud run deploy "$SERVICE" \
+            --image "$IMAGE" \
+            --region "$REGION" \
+            --allow-unauthenticated \
+            --service-account "next-${{ steps.envmap.outputs.ENV }}-sa@${PROJECT_ID}.iam.gserviceaccount.com" \
+            --min-instances=0 --max-instances=3 --cpu=1 --memory=512Mi \
+            --set-env-vars "NODE_ENV=production,INSTANCE_CONNECTION_NAME=${{ env.INSTANCE_CONNECTION_NAME }},PGUSER=${{ steps.envmap.outputs.PGUSER }},PGPASSWORD=${{ steps.envmap.outputs.PGPASSWORD }},PGDATABASE=${{ steps.envmap.outputs.PGDATABASE }},NEXTAUTH_SECRET=${{ steps.envmap.outputs.NEXTAUTH_SECRET }},NEXTAUTH_URL=${SERVICE_URL}"
