@@ -1,6 +1,6 @@
 'use client'
 
-import type {Mesh, MeshBasicMaterial, PointsMaterial} from 'three';
+import type {Mesh, MeshBasicMaterial, PointsMaterial, WebGLRenderer} from 'three';
 
 import {useEffect, useRef} from 'react'
 import {gsap} from 'gsap'
@@ -17,7 +17,7 @@ export default function ThreeBackground() {
     if (!canvasRef.current) return
     if (typeof window === 'undefined') return
 
-    let renderer: any
+      let renderer: WebGLRenderer | null = null
     let animationId: number
 
     // Import Three.js dynamically to avoid SSR issues
@@ -307,7 +307,9 @@ export default function ThreeBackground() {
         seenGroup.rotation.y = elapsedTime * 0.05
         arabicLettersGroup.rotation.y = elapsedTime * 0.03  // Slower rotation for letters
         hearthshireGroup.rotation.y = elapsedTime * 0.05
-        renderer.render(scene, camera)
+          if (renderer) {
+              renderer.render(scene, camera)
+          }
         animationId = requestAnimationFrame(animate)
       }
       animate()
@@ -316,8 +318,10 @@ export default function ThreeBackground() {
       const handleResize = () => {
         camera.aspect = window.innerWidth / window.innerHeight
         camera.updateProjectionMatrix()
-        renderer.setSize(window.innerWidth, window.innerHeight)
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+          if (renderer) {
+              renderer.setSize(window.innerWidth, window.innerHeight)
+              renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+          }
       }
       window.addEventListener('resize', handleResize)
 

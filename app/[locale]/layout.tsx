@@ -1,7 +1,20 @@
 import type {Metadata} from "next";
 import {NextIntlClientProvider} from 'next-intl';
+import {Almarai, Inter} from 'next/font/google';
 import "../globals.css";
 import AuthProvider from '@/components/AuthProvider';
+
+const inter = Inter({
+    subsets: ['latin'],
+    weight: ['400', '700', '900'],
+    display: 'swap',
+});
+
+const almarai = Almarai({
+    subsets: ['arabic'],
+    weight: ['300', '400', '700', '800'],
+    display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: "Yousef Baitalmal | Visionary Engineer & Creator",
@@ -21,11 +34,11 @@ export default async function LocaleLayout({
   let messages;
   try {
     messages = (await import(`../../messages/${locale}.json`)).default;
-  } catch (error) {
+  } catch {
     // Fallback to English messages if locale file not found
     try {
       messages = (await import(`../../messages/en.json`)).default;
-    } catch (fallbackError) {
+    } catch {
       // If even English messages can't be loaded, use empty object
       messages = {};
     }
@@ -35,15 +48,10 @@ export default async function LocaleLayout({
  
   return (
     <html lang={locale} dir={isRTL ? 'rtl' : 'ltr'}>
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Almarai:wght@300;400;700;800&family=Inter:wght@400;700;900&display=swap"
-          rel="stylesheet"
-        />
-      </head>
-      <body suppressHydrationWarning={true} className={isRTL ? 'font-almarai' : 'font-inter'}>
+    <body
+        suppressHydrationWarning={true}
+        className={isRTL ? almarai.className : inter.className}
+    >
       <AuthProvider>
         <NextIntlClientProvider locale={locale} messages={messages}>
           {children}

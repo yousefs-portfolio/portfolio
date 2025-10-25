@@ -7,7 +7,7 @@ import {format} from 'date-fns'
 import {ar, enUS} from 'date-fns/locale'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import {useLocale, useTranslations} from 'next-intl'
+import {useLocale} from 'next-intl'
 
 interface BlogPost {
   id: string
@@ -31,7 +31,6 @@ export default function BlogPostPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const locale = useLocale()
-  const t = useTranslations()
   const isArabic = locale === 'ar'
 
   useEffect(() => {

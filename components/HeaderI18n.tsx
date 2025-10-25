@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useTranslations, useLocale } from 'next-intl'
-import { signOut, useSession } from 'next-auth/react'
+import {useEffect, useState} from 'react'
+import Link from 'next/link'
+import {useLocale, useTranslations} from 'next-intl'
+import {signOut, useSession} from 'next-auth/react'
 import LanguageSwitcher from './LanguageSwitcher'
 
 interface HeaderProps {
@@ -21,8 +22,7 @@ export default function Header({ onServicesClick }: HeaderProps) {
 
   const isAdmin = status === 'authenticated' && Boolean(session?.user?.isAdmin)
 
-  const scrollToContact = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault()
+    const scrollToContact = () => {
     document.querySelector('#contact')?.scrollIntoView({ behavior: 'smooth' })
   }
 
@@ -33,11 +33,13 @@ export default function Header({ onServicesClick }: HeaderProps) {
   if (!mounted) {
     return (
       <header className="fixed top-0 left-0 right-0 z-50 p-6 flex justify-between items-center">
-        <a href={`/${locale}`} className="text-xl font-bold tracking-tighter">YOUSEF BAITALMAL</a>
+          <Link href={`/${locale}`} className="text-xl font-bold tracking-tighter">YOUSEF BAITALMAL</Link>
         <nav className="hidden md:flex items-center space-x-8">
-          <a href={`/${locale}/blog`} className="hover:text-white transition-colors">Blog</a>
-          <button className="hover:text-white transition-colors">Services</button>
-          <a href="#contact" className="hover:text-white transition-colors">Contact</a>
+            <Link href={`/${locale}/blog`} className="hover:text-white transition-colors">Blog</Link>
+            <button type="button" onClick={onServicesClick} className="hover:text-white transition-colors">Services
+            </button>
+            <button type="button" onClick={scrollToContact} className="hover:text-white transition-colors">Contact
+            </button>
           <LanguageSwitcher />
         </nav>
         <button className="md:hidden z-50">
@@ -49,15 +51,18 @@ export default function Header({ onServicesClick }: HeaderProps) {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 p-6 flex justify-between items-center">
-      <a href={`/${locale}`} className="text-xl font-bold tracking-tighter">YOUSEF BAITALMAL</a>
+        <Link href={`/${locale}`} className="text-xl font-bold tracking-tighter">YOUSEF BAITALMAL</Link>
       <nav className="hidden md:flex items-center space-x-8">
-        <a href={`/${locale}/blog`} className="hover:text-white transition-colors">{t('blog')}</a>
-        <button id="services-btn" onClick={onServicesClick} className="hover:text-white transition-colors">{t('services')}</button>
-        <a href="#contact" onClick={scrollToContact} className="hover:text-white transition-colors">{t('contact')}</a>
+          <Link href={`/${locale}/blog`} className="hover:text-white transition-colors">{t('blog')}</Link>
+          <button id="services-btn" type="button" onClick={onServicesClick}
+                  className="hover:text-white transition-colors">{t('services')}</button>
+          <button type="button" onClick={scrollToContact}
+                  className="hover:text-white transition-colors">{t('contact')}</button>
         {isAdmin && (
           <>
-            <a href="/admin" className="hover:text-white transition-colors">{t('admin')}</a>
-            <button onClick={handleLogout} className="hover:text-white transition-colors">{t('logout')}</button>
+              <Link href="/admin" className="hover:text-white transition-colors">{t('admin')}</Link>
+              <button type="button" onClick={handleLogout}
+                      className="hover:text-white transition-colors">{t('logout')}</button>
           </>
         )}
         <LanguageSwitcher />

@@ -1,6 +1,7 @@
 'use client'
 
 import {useEffect, useState} from 'react'
+import Link from 'next/link'
 import {signOut, useSession} from 'next-auth/react'
 import {useLocale} from 'next-intl'
 
@@ -107,12 +108,12 @@ export default function AdminPage() {
       <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center space-y-4">
         <h1 className="text-3xl font-bold">Admin Access Required</h1>
         <p className="text-gray-400">Please sign in at the admin portal.</p>
-        <a
+          <Link
           href="/admin/login"
           className="px-6 py-3 rounded-lg bg-white text-black font-semibold hover:bg-gray-200 transition"
         >
           Go to Admin Login
-        </a>
+          </Link>
       </div>
     )
   }

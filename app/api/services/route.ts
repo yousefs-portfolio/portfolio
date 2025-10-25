@@ -1,7 +1,7 @@
-import { NextResponse } from 'next/server';
+import {NextResponse} from 'next/server';
 
-import { keystaticServiceContent } from '@adapters/content/keystatic/service.content';
-import { listServices } from '@core/use-cases/list-services';
+import {keystaticServiceContent} from '@adapters/content/keystatic/service.content';
+import {listServices} from '@core/use-cases/list-services';
 
 export const runtime = 'nodejs'
 
@@ -20,7 +20,7 @@ export async function GET() {
     }));
 
     return NextResponse.json(payload, { status: 200 })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error reading services from Keystatic:', error);
     return NextResponse.json({ error: 'Failed to load services' }, { status: 500 })
   }
