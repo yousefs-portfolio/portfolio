@@ -1,10 +1,11 @@
 import {eq} from 'drizzle-orm';
 
 import {passwordHasher} from '@adapters/crypto/node/password-hasher';
-import {db, pool} from '@/app/lib/db';
+import {getDb, getPool} from '@/app/lib/db';
 import {projects, services, users} from '@/drizzle/schema';
 
 const upsertProjects = async () => {
+    const db = await getDb();
     await db
         .insert(projects)
         .values({
@@ -58,6 +59,7 @@ const upsertProjects = async () => {
 };
 
 const upsertServices = async () => {
+    const db = await getDb();
     await db
         .insert(services)
         .values({
@@ -101,6 +103,7 @@ const upsertDefaultAdmin = async () => {
 
     const {hash, salt} = await passwordHasher.hash(defaultPassword);
 
+    const db = await getDb();
     const existingUser = await db
         .select()
         .from(users)
@@ -147,5 +150,6 @@ seed()
     })
     .finally(async () => {
         // Drain active connections when running as a one-off script.
+        const pool = await getPool();
         await pool.end();
     });

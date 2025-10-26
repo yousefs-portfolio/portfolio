@@ -1,9 +1,10 @@
-import {db} from '@/app/lib/db';
+import {getDb} from '@/app/lib/db';
 
 export const runtime = 'nodejs';
 
 export async function GET() {
     try {
+        const db = await getDb();
         const result = await db.execute(/* sql */ `SELECT 1 AS ok`);
         return Response.json({ok: true, rows: result.rows});
     } catch (err) {

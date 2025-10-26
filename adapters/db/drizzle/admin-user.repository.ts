@@ -4,7 +4,7 @@ import type {AdminUser} from '@core/domain/user';
 import type {AdminUserRepository} from '@core/interfaces/repositories';
 
 import type {DrizzleDb} from '@/app/lib/db';
-import {db} from '@/app/lib/db';
+import {getDb} from '@/app/lib/db';
 import * as schema from '@/drizzle/schema';
 
 const {users} = schema;
@@ -25,31 +25,51 @@ const mapAdminUser = (record: UserRecord): AdminUser => ({
 });
 
 export const createDrizzleAdminUserRepository = (
-    client: UserClient = db,
-): AdminUserRepository => ({
-    async findByUsername(username) {
-        const [user] = await client
-            .select()
-            .from(users)
-            .where(eq(users.username, username))
-            .limit(1);
+    client?: UserClient,
+): AdminUserRepository => {
+    let cachedClient: DrizzleDb | undefined;
+    const resolveClient = async () => {
+        if (client) {
+            return client;
+        }
+        if (!cachedClient) {
+            cachedClient = await getDb();
+        }
+        return cachedClient;
+    };
 
-        return user ? mapAdminUser(user) : null;
-    },
-    async findById(id) {
-        const [user] = await client.select().from(users).where(eq(users.id, id)).limit(1);
-        return user ? mapAdminUser(user) : null;
-    },
-    async updatePassword(id, input) {
-        await client
-            .update(users)
-            .set({
-                passwordHash: input.hash,
-                passwordSalt: input.salt,
-                mustChangePassword: input.mustChangePassword,
-            })
-            .where(eq(users.id, id));
-    },
-});
+    return {
+        async findByUsername(username) {
+            const dbClient = await resolveClient();
+            const [user] = await dbClient
+                .select()
+                .from(users)
+                .where(eq(users.username, username))
+                .limit(1);
+
+            return user ? mapAdminUser(user) : null;
+        },
+        async findById(id) {
+            const dbClient = await resolveClient();
+            const [user] = await dbClient
+                .select()
+                .from(users)
+                .where(eq(users.id, id))
+                .limit(1);
+            return user ? mapAdminUser(user) : null;
+        },
+        async updatePassword(id, input) {
+            const dbClient = await resolveClient();
+            await dbClient
+                .update(users)
+                .set({
+                    passwordHash: input.hash,
+                    passwordSalt: input.salt,
+                    mustChangePassword: input.mustChangePassword,
+                })
+                .where(eq(users.id, id));
+        },
+    };
+};
 
 export const drizzleAdminUserRepository = createDrizzleAdminUserRepository();

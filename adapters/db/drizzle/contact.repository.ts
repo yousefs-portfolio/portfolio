@@ -4,7 +4,7 @@ import type {Contact} from '@core/domain/contact';
 import type {ContactRepository} from '@core/interfaces/repositories';
 
 import type {DrizzleDb} from '@/app/lib/db';
-import {db} from '@/app/lib/db';
+import {getDb} from '@/app/lib/db';
 import * as schema from '@/drizzle/schema';
 
 const {contacts} = schema;
@@ -23,33 +23,48 @@ const mapContact = (record: ContactRecord): Contact => ({
 });
 
 export const createDrizzleContactRepository = (
-    client: ContactClient = db,
-): ContactRepository => ({
-    async create(input) {
-        const [created] = await client
-            .insert(contacts)
-            .values({
-                name: input.name,
-                email: input.email ?? null,
-                whatsapp: input.whatsapp ?? null,
-                requirements: input.requirements,
-            })
-            .returning();
-
-        if (!created) {
-            throw new Error('Failed to persist contact');
+    client?: ContactClient,
+): ContactRepository => {
+    let cachedClient: DrizzleDb | undefined;
+    const resolveClient = async () => {
+        if (client) {
+            return client;
         }
+        if (!cachedClient) {
+            cachedClient = await getDb();
+        }
+        return cachedClient;
+    };
 
-        return mapContact(created);
-    },
-    async list() {
-        const records = await client
-            .select()
-            .from(contacts)
-            .orderBy(desc(contacts.createdAt));
+    return {
+        async create(input) {
+            const dbClient = await resolveClient();
+            const [created] = await dbClient
+                .insert(contacts)
+                .values({
+                    name: input.name,
+                    email: input.email ?? null,
+                    whatsapp: input.whatsapp ?? null,
+                    requirements: input.requirements,
+                })
+                .returning();
 
-        return records.map(mapContact);
-    },
-});
+            if (!created) {
+                throw new Error('Failed to persist contact');
+            }
+
+            return mapContact(created);
+        },
+        async list() {
+            const dbClient = await resolveClient();
+            const records = await dbClient
+                .select()
+                .from(contacts)
+                .orderBy(desc(contacts.createdAt));
+
+            return records.map(mapContact);
+        },
+    };
+};
 
 export const drizzleContactRepository = createDrizzleContactRepository();

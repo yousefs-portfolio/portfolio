@@ -82,30 +82,50 @@ const createPool = async (): Promise<Pool> => {
     return pool;
 };
 
-const poolPromise =
-    globalForDb.__pgPoolPromise ??
-    createPool().then((pool) => {
-        if (shouldCache) {
-            globalForDb.__pgPool = pool;
-        }
+let pool: Pool | undefined = globalForDb.__pgPool;
+let db: NodePgDatabase<typeof schema> | undefined = globalForDb.__drizzleDb;
+
+const getPool = async (): Promise<Pool> => {
+    if (pool) {
         return pool;
-    });
+    }
 
-if (shouldCache) {
-    globalForDb.__pgPoolPromise = poolPromise;
-}
+    const poolPromise =
+        globalForDb.__pgPoolPromise ??
+        createPool().then((createdPool) => {
+            if (shouldCache) {
+                globalForDb.__pgPool = createdPool;
+                pool = createdPool;
+            }
+            return createdPool;
+        });
 
-const pool = globalForDb.__pgPool ?? (await poolPromise);
+    if (shouldCache) {
+        globalForDb.__pgPoolPromise = poolPromise;
+    }
 
-const db =
-    globalForDb.__drizzleDb ??
-    drizzle(pool, {
-        schema,
-    });
+    pool = await poolPromise;
+    return pool;
+};
 
-if (shouldCache) {
-    globalForDb.__drizzleDb = db;
-}
+const getDb = async (): Promise<NodePgDatabase<typeof schema>> => {
+    if (db) {
+        return db;
+    }
 
-export {db, pool};
-export type DrizzleDb = typeof db;
+    const resolvedPool = await getPool();
+    db =
+        globalForDb.__drizzleDb ??
+        drizzle(resolvedPool, {
+            schema,
+        });
+
+    if (shouldCache) {
+        globalForDb.__drizzleDb = db;
+    }
+
+    return db;
+};
+
+export {getDb, getPool};
+export type DrizzleDb = NodePgDatabase<typeof schema>;
