@@ -92,14 +92,19 @@ jobs:
           PGPASSWORD: ${{ steps.envmap.outputs.PGPASSWORD }}
           PGUSER: ${{ steps.envmap.outputs.PGUSER }}
           PGDATABASE: ${{ steps.envmap.outputs.PGDATABASE }}
+          PGHOST: 127.0.0.1
+          PGPORT: 5432
+          PGSSLMODE: disable
           DATABASE_URL: postgresql://${{ steps.envmap.outputs.PGUSER }}:${{ steps.envmap.outputs.PGPASSWORD }}@127.0.0.1:5432/${{ steps.envmap.outputs.PGDATABASE }}
         run: |
           corepack enable || true
-          if [ -f pnpm-lock.yaml ]; then corepack prepare pnpm@latest --activate; pnpm i --frozen-lockfile; \
+          # install
+          if [ -f pnpm-lock.yaml ]; then corepack prepare pnpm@latest --activate; pnpm i --frozen-lockfile || pnpm i; \
           elif [ -f yarn.lock ]; then yarn --frozen-lockfile; \
-          else npm ci; fi
-          npm run db:push
-          npm run db:seed:dev
+          else npm ci || npm i; fi
+          npx drizzle-kit migrate
+          # optional seed (if you want)
+          # npx tsx scripts/db/seed-pg.ts
 
       # 3) Compute service URL & deploy (sets NEXTAUTH_URL + SECRET)
       - name: Get Project Number
