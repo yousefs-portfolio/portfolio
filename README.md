@@ -9,7 +9,7 @@
 <div align="center">
   <h1>🚀 Portfolio | Yousef Baitalmal</h1>
   <p><strong>Engineering from First Principles</strong></p>
-  <p>A production-grade portfolio and admin platform built around clean architecture, multilingual content, and immersive 3D storytelling.</p>
+  <p>A production-grade portfolio and admin platform combining immersive 3D storytelling, multilingual content, and clean architecture.</p>
 </div>
 
 <div align="center">
@@ -25,35 +25,31 @@
 
 ### 🎨 Immersive 3D Storytelling
 
-- Scroll-driven Three.js narrative spanning language → framework → immersive experience.
-- Arabic letter particle field and voxel world animated with GSAP.
-- Responsive canvas with graceful fallbacks for low-powered devices.
+- Scroll-driven Three.js narrative highlighting language → framework → experience.
+- Arabic letter particle field and voxel terrain animated with GSAP.
+- Responsive canvas with graceful degradation for low-powered devices.
 
 ### 🧱 Layered Content Architecture
 
-- App Router, Server Components, and Server Actions with clear controller boundaries.
-- Keystatic-powered admin for managing projects, services, and blog posts.
-- REST API endpoints for future integrations (`/api/projects`, `/api/blog`, `/api/contact`, ...).
+- App Router + Server Components with thin controllers over shared use-cases.
+- Keystatic-backed admin for projects, services, blog posts, and translations.
+- REST endpoints ready for integrations (`/api/projects`, `/api/blog`, `/api/contact`, ...).
 
 ### 🌍 Full Internationalization
-
 - English ↔ Arabic toggle with persistent preference and auto-detection.
-- RTL-aware typography via utility classes (`font-comfortaa`, `font-almarai`).
-- Bilingual Markdoc content surfaced through shared use-cases.
+- RTL-aware typography helpers (`font-comfortaa`, `font-almarai`).
+- Bilingual Markdoc content surfaced through shared use-case logic.
 
 ### 🔐 Production-Ready Platform
-
 - NextAuth admin auth with enforced password rotation.
-- Cloud Run + Cloud SQL deploy targets, including `/api/db/health` probe.
+- Cloud Run + Cloud SQL Postgres deployment path, including `/api/db/health` probe.
 - Strict TypeScript, ESLint, Vitest, and Playwright-ready scaffolding.
 
 ### 🪪 Clean Architecture Enforcement
 
-- `core/` holds domain entities, interfaces, and use-cases (no framework imports).
+- `core/` hosts domain entities, interfaces, and use-cases (framework-free).
 - `adapters/` implements infrastructure (Drizzle/Postgres, Keystatic, auth).
-- Routes/controllers validate inputs and map results across layers.
-
----
+- Routes/controllers validate inputs and map results between layers.
 
 ## 🛠️ Tech Stack
 
@@ -68,10 +64,11 @@
 ### **Backend**
 - **Runtime**: [Node.js](https://nodejs.org/)
 - **ORM**: [Drizzle ORM](https://orm.drizzle.team/)
-- **Database**: SQLite (Development) / PostgreSQL (Production-ready)
-- **API**: RESTful endpoints with Next.js API Routes
+- **Database**: Cloud SQL Postgres (primary) with SQLite fallback for local development
+- **API**: RESTful endpoints via Next.js route handlers
 
 ### **Developer Experience**
+
 - **Build Tool**: [Turbopack](https://turbo.build/pack)
 - **Package Manager**: npm/yarn/pnpm
 - **Linting**: ESLint with Next.js config
@@ -101,8 +98,11 @@
 
 3. **Set up the database**
    ```bash
+   # Local SQLite (default)
    npm run db:push
    ```
+   > To target Postgres instead, set `DATABASE_URL=postgres://...` (or individual Cloud SQL env vars) before running the
+   command.
 
 4. **Seed the database**
    ```bash
