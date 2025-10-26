@@ -1,9 +1,10 @@
-import { NextResponse } from 'next/server';
+import {NextResponse} from 'next/server';
 
-import { keystaticProjectContent } from '@adapters/content/keystatic/project.content';
-import { listProjects } from '@core/use-cases/list-projects';
+import {keystaticProjectContent} from '@adapters/content/keystatic/project.content';
+import {listProjects} from '@core/use-cases/list-projects';
 
-export const runtime = 'nodejs'
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 // Keystatic reader is only available server-side
 // We import dynamically to avoid issues in edge-like environments
@@ -25,9 +26,9 @@ export async function GET() {
       order: project.order,
     }));
 
-    return NextResponse.json(payload, { status: 200 })
+      return NextResponse.json(payload, {status: 200});
   } catch (error) {
     console.error('Error reading projects from Keystatic:', error);
-    return NextResponse.json({ error: 'Failed to load projects' }, { status: 500 })
+      return NextResponse.json({error: 'Failed to load projects'}, {status: 500});
   }
 }

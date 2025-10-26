@@ -3,7 +3,8 @@ import {NextResponse} from 'next/server';
 import {keystaticServiceContent} from '@adapters/content/keystatic/service.content';
 import {listServices} from '@core/use-cases/list-services';
 
-export const runtime = 'nodejs'
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
@@ -19,9 +20,9 @@ export async function GET() {
       order: service.order,
     }));
 
-    return NextResponse.json(payload, { status: 200 })
+      return NextResponse.json(payload, {status: 200});
   } catch (error: unknown) {
     console.error('Error reading services from Keystatic:', error);
-    return NextResponse.json({ error: 'Failed to load services' }, { status: 500 })
+      return NextResponse.json({error: 'Failed to load services'}, {status: 500});
   }
 }

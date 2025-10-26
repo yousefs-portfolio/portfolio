@@ -10,7 +10,12 @@ import * as schema from '@/drizzle/schema';
 const {contacts} = schema;
 
 type ContactRecord = typeof contacts.$inferSelect;
-type TransactionClient = Parameters<Parameters<DrizzleDb['transaction']>[0]>[0];
+type TransactionClient = Parameters<DrizzleDb['transaction']>[0] extends (
+        tx: infer Tx,
+        ...args: any[]
+    ) => any
+    ? Tx
+    : DrizzleDb;
 type ContactClient = DrizzleDb | TransactionClient;
 
 const mapContact = (record: ContactRecord): Contact => ({

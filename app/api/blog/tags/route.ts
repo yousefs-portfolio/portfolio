@@ -1,9 +1,10 @@
-import { NextResponse } from 'next/server';
+import {NextResponse} from 'next/server';
 
-import { keystaticBlogContent } from '@adapters/content/keystatic/blog.content';
-import { listBlogTags } from '@core/use-cases/list-blog-tags';
+import {keystaticBlogContent} from '@adapters/content/keystatic/blog.content';
+import {listBlogTags} from '@core/use-cases/list-blog-tags';
 
-export const runtime = 'nodejs'
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 // GET all unique tags from blog posts
 export async function GET() {

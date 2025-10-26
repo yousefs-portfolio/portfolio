@@ -1,15 +1,16 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth/next';
-import { z } from 'zod';
+import {NextRequest, NextResponse} from 'next/server';
+import {getServerSession} from 'next-auth/next';
+import {z} from 'zod';
 
 import {drizzleAdminUserRepository} from '@adapters/db/drizzle/admin-user.repository';
 import {drizzleTx} from '@adapters/db/drizzle/transaction';
-import { passwordHasher } from '@adapters/crypto/node/password-hasher';
-import { authOptions } from '@adapters/auth/nextauth';
-import { changeAdminPassword } from '@core/use-cases/change-admin-password';
-import { UseCaseError } from '@core/lib/errors';
+import {passwordHasher} from '@adapters/crypto/node/password-hasher';
+import {authOptions} from '@adapters/auth/nextauth';
+import {changeAdminPassword} from '@core/use-cases/change-admin-password';
+import {UseCaseError} from '@core/lib/errors';
 
-export const runtime = 'nodejs'
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 const BodySchema = z.object({
   newPassword: z.string().min(8),

@@ -10,7 +10,12 @@ import * as schema from '@/drizzle/schema';
 const {users} = schema;
 
 type UserRecord = typeof users.$inferSelect;
-type TransactionClient = Parameters<Parameters<DrizzleDb['transaction']>[0]>[0];
+type TransactionClient = Parameters<DrizzleDb['transaction']>[0] extends (
+        tx: infer Tx,
+        ...args: any[]
+    ) => any
+    ? Tx
+    : DrizzleDb;
 type UserClient = DrizzleDb | TransactionClient;
 
 const mapAdminUser = (record: UserRecord): AdminUser => ({

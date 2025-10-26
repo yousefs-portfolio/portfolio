@@ -1,11 +1,14 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
+import {NextRequest, NextResponse} from 'next/server';
+import {z} from 'zod';
 
 import {drizzleContactRepository} from '@adapters/db/drizzle/contact.repository';
 import {drizzleTx} from '@adapters/db/drizzle/transaction';
-import { createContact } from '@core/use-cases/create-contact';
-import { listContacts } from '@core/use-cases/list-contacts';
-import { UseCaseError } from '@core/lib/errors';
+import {createContact} from '@core/use-cases/create-contact';
+import {listContacts} from '@core/use-cases/list-contacts';
+import {UseCaseError} from '@core/lib/errors';
+
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 const BodySchema = z.object({
   name: z.string().min(2),

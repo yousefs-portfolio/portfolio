@@ -1,11 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
+import {NextRequest, NextResponse} from 'next/server';
+import {z} from 'zod';
 
-import { keystaticBlogContent } from '@adapters/content/keystatic/blog.content';
-import { getBlogPost } from '@core/use-cases/get-blog-post';
-import { UseCaseError } from '@core/lib/errors';
+import {keystaticBlogContent} from '@adapters/content/keystatic/blog.content';
+import {getBlogPost} from '@core/use-cases/get-blog-post';
+import {UseCaseError} from '@core/lib/errors';
 
 export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 const ParamsSchema = z.object({
   slug: z.string().min(1),

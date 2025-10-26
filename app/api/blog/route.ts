@@ -1,10 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
+import {NextRequest, NextResponse} from 'next/server';
+import {z} from 'zod';
 
-import { keystaticBlogContent } from '@adapters/content/keystatic/blog.content';
-import { listBlogPosts } from '@core/use-cases/list-blog-posts';
+import {keystaticBlogContent} from '@adapters/content/keystatic/blog.content';
+import {listBlogPosts} from '@core/use-cases/list-blog-posts';
 
-export const runtime = 'nodejs'
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 // GET all blog posts
 export async function GET(request: NextRequest) {

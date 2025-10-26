@@ -1,15 +1,17 @@
 import {getDb} from '@/app/lib/db';
 
 export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
     try {
         const db = await getDb();
-        const result = await db.execute(/* sql */ `SELECT 1 AS ok`);
+        const result = await db.execute(/* sql */ `select 1 as ok`);
         return Response.json({ok: true, rows: result.rows});
-    } catch (err) {
+    } catch (error) {
+        console.error('db/health error:', error);
         const message =
-            err instanceof Error ? err.message : JSON.stringify(err);
+            error instanceof Error ? error.message : String(error);
         return new Response(
             JSON.stringify({ok: false, error: message}),
             {
