@@ -125,7 +125,11 @@ jobs:
             --allow-unauthenticated \
             --service-account "next-${{ steps.envmap.outputs.ENV }}-sa@${PROJECT_ID}.iam.gserviceaccount.com" \
             --min-instances=0 --max-instances=3 --cpu=1 --memory=512Mi \
-            --set-env-vars "NODE_ENV=production,INSTANCE_CONNECTION_NAME=${{ env.INSTANCE_CONNECTION_NAME }},PGUSER=${{ steps.envmap.outputs.PGUSER }},PGPASSWORD=${{ steps.envmap.outputs.PGPASSWORD }},PGDATABASE=${{ steps.envmap.outputs.PGDATABASE }}"
+            --set-env-vars=NODE_ENV=production \
+            --set-env-vars=INSTANCE_CONNECTION_NAME=${{ env.INSTANCE_CONNECTION_NAME }} \
+            --set-env-vars=PGUSER=${{ steps.envmap.outputs.PGUSER }} \
+            --set-env-vars=PGPASSWORD=${{ steps.envmap.outputs.PGPASSWORD }} \
+            --set-env-vars=PGDATABASE=${{ steps.envmap.outputs.PGDATABASE }}
 
           # 2) Read the real service URL and set NEXTAUTH_URL in a separate update
           SERVICE_URL="$(gcloud run services describe "$SERVICE" --region "$REGION" --format='value(status.url)')"
