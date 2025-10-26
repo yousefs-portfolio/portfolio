@@ -1,272 +1,94 @@
-CREATE TABLE IF NOT EXISTS projects
-(
-    "id"
-    text
-    PRIMARY
-    KEY,
-    "title"
-    text
-    NOT
-    NULL,
-    "titleAr"
-    text,
-    "description"
-    text
-    NOT
-    NULL,
-    "descriptionAr"
-    text,
-    "layer"
-    text
-    NOT
-    NULL,
-    "layerName"
-    text
-    NOT
-    NULL,
-    "layerNameAr"
-    text,
-    "category"
-    text
-    NOT
-    NULL
-    DEFAULT
-    'web',
-    "content"
-    text
-    NOT
-    NULL,
-    "contentAr"
-    text,
-    "tech"
-    text
-    NOT
-    NULL
-    DEFAULT
-    '',
-    "techAr"
-    text
-    NOT
-    NULL
-    DEFAULT
-    '',
-    "liveUrl"
-    text,
-    "githubUrl"
-    text,
-    "featured"
-    boolean
-    NOT
-    NULL
-    DEFAULT
-    false,
-    "order"
-    integer
-    NOT
-    NULL
-    DEFAULT
-    0,
-    "createdAt"
-    timestamptz
-    NOT
-    NULL
-    DEFAULT
-    CURRENT_TIMESTAMP,
-    "updatedAt"
-    timestamptz
-    NOT
-    NULL
-    DEFAULT
-    CURRENT_TIMESTAMP
-);
+DO $$
+DECLARE
+    has_create BOOLEAN := has_schema_privilege(current_user, 'public', 'CREATE');
+BEGIN
+    IF NOT has_create THEN
+        RAISE NOTICE 'Skipping schema creation: % lacks CREATE privilege on schema public', current_user;
+        RETURN;
+    END IF;
 
-CREATE TABLE IF NOT EXISTS blog_posts
-(
-    "id"
-    text
-    PRIMARY
-    KEY,
-    "title"
-    text
-    NOT
-    NULL,
-    "titleAr"
-    text,
-    "content"
-    text
-    NOT
-    NULL,
-    "contentAr"
-    text,
-    "excerpt"
-    text
-    NOT
-    NULL,
-    "excerptAr"
-    text,
-    "tags"
-    text
-    NOT
-    NULL
-    DEFAULT
-    '',
-    "tagsAr"
-    text
-    NOT
-    NULL
-    DEFAULT
-    '',
-    "published"
-    boolean
-    NOT
-    NULL
-    DEFAULT
-    false,
-    "featured"
-    boolean
-    NOT
-    NULL
-    DEFAULT
-    false,
-    "slug"
-    text
-    NOT
-    NULL,
-    "createdAt"
-    timestamptz
-    NOT
-    NULL
-    DEFAULT
-    CURRENT_TIMESTAMP,
-    "updatedAt"
-    timestamptz
-    NOT
-    NULL
-    DEFAULT
-    CURRENT_TIMESTAMP
-);
+    CREATE TABLE IF NOT EXISTS projects
+    (
+        "id"           text PRIMARY KEY,
+        "title"        text NOT NULL,
+        "titleAr"      text,
+        "description"  text NOT NULL,
+        "descriptionAr" text,
+        "layer"        text NOT NULL,
+        "layerName"    text NOT NULL,
+        "layerNameAr"  text,
+        "category"     text NOT NULL DEFAULT 'web',
+        "content"      text NOT NULL,
+        "contentAr"    text,
+        "tech"         text NOT NULL DEFAULT '',
+        "techAr"       text NOT NULL DEFAULT '',
+        "liveUrl"      text,
+        "githubUrl"    text,
+        "featured"     boolean NOT NULL DEFAULT false,
+        "order"        integer NOT NULL DEFAULT 0,
+        "createdAt"    timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        "updatedAt"    timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
 
-CREATE UNIQUE INDEX IF NOT EXISTS blog_posts_slug_idx ON blog_posts ("slug");
+    CREATE TABLE IF NOT EXISTS blog_posts
+    (
+        "id"          text PRIMARY KEY,
+        "title"       text NOT NULL,
+        "titleAr"     text,
+        "content"     text NOT NULL,
+        "contentAr"   text,
+        "excerpt"     text NOT NULL,
+        "excerptAr"   text,
+        "tags"        text NOT NULL DEFAULT '',
+        "tagsAr"      text NOT NULL DEFAULT '',
+        "published"   boolean NOT NULL DEFAULT false,
+        "featured"    boolean NOT NULL DEFAULT false,
+        "slug"        text NOT NULL,
+        "createdAt"   timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        "updatedAt"   timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
 
-CREATE TABLE IF NOT EXISTS services
-(
-    "id"
-    text
-    PRIMARY
-    KEY,
-    "title"
-    text
-    NOT
-    NULL,
-    "titleAr"
-    text,
-    "description"
-    text
-    NOT
-    NULL,
-    "descriptionAr"
-    text,
-    "icon"
-    text,
-    "features"
-    text
-    NOT
-    NULL
-    DEFAULT
-    '',
-    "featuresAr"
-    text
-    NOT
-    NULL
-    DEFAULT
-    '',
-    "featured"
-    boolean
-    NOT
-    NULL
-    DEFAULT
-    false,
-    "order"
-    integer
-    NOT
-    NULL
-    DEFAULT
-    0,
-    "createdAt"
-    timestamptz
-    NOT
-    NULL
-    DEFAULT
-    CURRENT_TIMESTAMP,
-    "updatedAt"
-    timestamptz
-    NOT
-    NULL
-    DEFAULT
-    CURRENT_TIMESTAMP
-);
+    CREATE UNIQUE INDEX IF NOT EXISTS blog_posts_slug_idx ON blog_posts ("slug");
 
-CREATE TABLE IF NOT EXISTS contacts
-(
-    "id"
-    text
-    PRIMARY
-    KEY,
-    "name"
-    text
-    NOT
-    NULL,
-    "email"
-    text,
-    "whatsapp"
-    text,
-    "requirements"
-    text
-    NOT
-    NULL,
-    "createdAt"
-    timestamptz
-    NOT
-    NULL
-    DEFAULT
-    CURRENT_TIMESTAMP
-);
+    CREATE TABLE IF NOT EXISTS services
+    (
+        "id"           text PRIMARY KEY,
+        "title"        text NOT NULL,
+        "titleAr"      text,
+        "description"  text NOT NULL,
+        "descriptionAr" text,
+        "icon"         text,
+        "features"     text NOT NULL DEFAULT '',
+        "featuresAr"   text NOT NULL DEFAULT '',
+        "featured"     boolean NOT NULL DEFAULT false,
+        "order"        integer NOT NULL DEFAULT 0,
+        "createdAt"    timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        "updatedAt"    timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
 
-CREATE TABLE IF NOT EXISTS users
-(
-    "id"
-    text
-    PRIMARY
-    KEY,
-    "username"
-    text
-    NOT
-    NULL,
-    "email"
-    text,
-    "name"
-    text,
-    "passwordHash"
-    text
-    NOT
-    NULL,
-    "passwordSalt"
-    text
-    NOT
-    NULL,
-    "mustChangePassword"
-    boolean
-    NOT
-    NULL
-    DEFAULT
-    true,
-    "isAdmin"
-    boolean
-    NOT
-    NULL
-    DEFAULT
-    false
-);
+    CREATE TABLE IF NOT EXISTS contacts
+    (
+        "id"           text PRIMARY KEY,
+        "name"         text NOT NULL,
+        "email"        text,
+        "whatsapp"     text,
+        "requirements" text NOT NULL,
+        "createdAt"    timestamptz NOT NULL DEFAULT CURRENT_TIMESTAMP
+    );
 
-CREATE UNIQUE INDEX IF NOT EXISTS users_username_idx ON users ("username");
-CREATE UNIQUE INDEX IF NOT EXISTS users_email_idx ON users ("email");
+    CREATE TABLE IF NOT EXISTS users
+    (
+        "id"                 text PRIMARY KEY,
+        "username"           text NOT NULL,
+        "email"              text,
+        "name"               text,
+        "passwordHash"       text NOT NULL,
+        "passwordSalt"       text NOT NULL,
+        "mustChangePassword" boolean NOT NULL DEFAULT true,
+        "isAdmin"            boolean NOT NULL DEFAULT false
+    );
+
+    CREATE UNIQUE INDEX IF NOT EXISTS users_username_idx ON users ("username");
+    CREATE UNIQUE INDEX IF NOT EXISTS users_email_idx ON users ("email");
+END;
+$$;
