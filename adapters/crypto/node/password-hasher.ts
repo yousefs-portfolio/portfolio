@@ -1,30 +1,49 @@
-import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
+import {scryptSync, timingSafeEqual} from 'node:crypto';
+import bcrypt from 'bcryptjs';
 
-import type { PasswordHasher } from '@core/interfaces/crypto';
+import type {PasswordHasher} from '@core/interfaces/crypto';
 
-const SALT_BYTES = 16;
-const KEY_LENGTH = 64;
+const LEGACY_SALT_BYTES = 16;
+const LEGACY_KEY_LENGTH = 64;
+const BCRYPT_ROUNDS = 12;
+
+const isLegacySalt = (salt: string): boolean => /^[0-9a-f]{32}$/i.test(salt);
+const isLegacyHash = (hash: string): boolean => /^[0-9a-f]{128}$/i.test(hash);
 
 export class NodePasswordHasher implements PasswordHasher {
-  async hash(password: string, salt?: string): Promise<{ hash: string; salt: string }> {
-    const resolvedSalt = salt ?? randomBytes(SALT_BYTES).toString('hex');
-    const saltBuffer = Buffer.from(resolvedSalt, 'hex');
-    const derived = scryptSync(password, saltBuffer, KEY_LENGTH);
-    return {
-      hash: derived.toString('hex'),
-      salt: resolvedSalt,
-    };
-  }
+    async hash(
+        password: string,
+        salt?: string,
+    ): Promise<{ hash: string; salt: string }> {
+        if (salt && isLegacySalt(salt)) {
+            const saltBuffer = Buffer.from(salt, 'hex');
+            const derived = scryptSync(password, saltBuffer, LEGACY_KEY_LENGTH);
+            return {
+                hash: derived.toString('hex'),
+                salt,
+            };
+        }
 
-  async verify(password: string, hash: string, salt: string): Promise<boolean> {
-    const { hash: compareHash } = await this.hash(password, salt);
-    const hashBuffer = Buffer.from(hash, 'hex');
-    const compareBuffer = Buffer.from(compareHash, 'hex');
-    if (hashBuffer.length !== compareBuffer.length) {
-      return false;
+        const resolvedSalt = salt && !isLegacySalt(salt)
+            ? salt
+            : await bcrypt.genSalt(BCRYPT_ROUNDS);
+        const hash = await bcrypt.hash(password, resolvedSalt);
+        return {hash, salt: resolvedSalt};
     }
-    return timingSafeEqual(hashBuffer, compareBuffer);
-  }
+
+    async verify(password: string, hash: string, salt: string): Promise<boolean> {
+        if (isLegacySalt(salt) && isLegacyHash(hash)) {
+            const legacySaltBuffer = Buffer.from(salt, 'hex');
+            const derived = scryptSync(password, legacySaltBuffer, LEGACY_KEY_LENGTH);
+            const hashBuffer = Buffer.from(hash, 'hex');
+            if (hashBuffer.length !== derived.length) {
+                return false;
+            }
+            return timingSafeEqual(hashBuffer, derived);
+        }
+
+        return bcrypt.compare(password, hash);
+    }
 }
 
 export const passwordHasher = new NodePasswordHasher();

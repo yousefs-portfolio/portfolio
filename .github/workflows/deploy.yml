@@ -87,7 +87,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Install deps & run migrations
+      - name: Install deps, sync schema, and seed
         env:
           PGPASSWORD: ${{ steps.envmap.outputs.PGPASSWORD }}
           PGUSER: ${{ steps.envmap.outputs.PGUSER }}
@@ -98,7 +98,8 @@ jobs:
           if [ -f pnpm-lock.yaml ]; then corepack prepare pnpm@latest --activate; pnpm i --frozen-lockfile; \
           elif [ -f yarn.lock ]; then yarn --frozen-lockfile; \
           else npm ci; fi
-          npx drizzle-kit migrate
+          npm run db:push
+          npm run db:seed:dev
 
       # 3) Compute service URL & deploy (sets NEXTAUTH_URL + SECRET)
       - name: Get Project Number

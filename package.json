@@ -16,8 +16,9 @@
     "ci": "npm run lint && npm run typecheck && npm run test",
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
+    "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
-    "db:seed": "tsx scripts/db/seed.ts"
+    "db:seed:dev": "tsx scripts/db/seed-pg.ts"
   },
   "dependencies": {
     "@google-cloud/cloud-sql-connector": "^1.8.4",
@@ -25,7 +26,7 @@
     "@keystatic/next": "^5.0.4",
     "@paralleldrive/cuid2": "^3.1.0",
     "@types/three": "^0.172.0",
-    "better-sqlite3": "^12.4.1",
+    "bcryptjs": "^2.4.3",
     "date-fns": "^4.1.0",
     "drizzle-orm": "^0.44.7",
     "gsap": "^3.12.8",
@@ -45,7 +46,6 @@
     "@eslint/eslintrc": "^3",
     "@playwright/test": "^1.49.0",
     "@tailwindcss/postcss": "^4",
-    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^20",
     "@types/pg": "^8.15.5",
     "@types/react": "^19",

@@ -3,12 +3,15 @@ import {desc} from 'drizzle-orm';
 import type {Contact} from '@core/domain/contact';
 import type {ContactRepository} from '@core/interfaces/repositories';
 
-import type {DrizzleDb} from '@/drizzle/db';
-import {db} from '@/drizzle/db';
-import {contacts} from '@/drizzle/schema';
+import type {DrizzleDb} from '@/app/lib/db';
+import {db} from '@/app/lib/db';
+import * as schema from '@/drizzle/schema';
+
+const {contacts} = schema;
 
 type ContactRecord = typeof contacts.$inferSelect;
-type ContactClient = DrizzleDb;
+type TransactionClient = Parameters<Parameters<DrizzleDb['transaction']>[0]>[0];
+type ContactClient = DrizzleDb | TransactionClient;
 
 const mapContact = (record: ContactRecord): Contact => ({
     id: record.id,

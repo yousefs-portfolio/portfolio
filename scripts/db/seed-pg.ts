@@ -1,18 +1,10 @@
-import {randomBytes, scryptSync} from 'node:crypto';
-
 import {eq} from 'drizzle-orm';
 
-import {db, sqlite} from '../../drizzle/db';
-import {projects, services, users} from '../../drizzle/schema';
+import {passwordHasher} from '@adapters/crypto/node/password-hasher';
+import {db, pool} from '@/app/lib/db';
+import {projects, services, users} from '@/drizzle/schema';
 
-const hashPassword = (password: string, salt?: string) => {
-    const resolvedSalt = salt ?? randomBytes(16).toString('hex');
-    const saltBuffer = Buffer.from(resolvedSalt, 'hex');
-    const derived = scryptSync(password, saltBuffer, 64).toString('hex');
-    return {hash: derived, salt: resolvedSalt};
-};
-
-async function seed() {
+const upsertProjects = async () => {
     await db
         .insert(projects)
         .values({
@@ -63,7 +55,9 @@ async function seed() {
             order: 3,
         })
         .onConflictDoNothing();
+};
 
+const upsertServices = async () => {
     await db
         .insert(services)
         .values({
@@ -99,10 +93,13 @@ async function seed() {
             order: 3,
         })
         .onConflictDoNothing();
+};
 
+const upsertDefaultAdmin = async () => {
     const defaultUsername = 'admin';
     const defaultPassword = 'admin';
-    const {hash, salt} = hashPassword(defaultPassword);
+
+    const {hash, salt} = await passwordHasher.hash(defaultPassword);
 
     const existingUser = await db
         .select()
@@ -122,16 +119,23 @@ async function seed() {
             passwordSalt: salt,
             mustChangePassword: true,
         });
-    } else {
-        await db
-            .update(users)
-            .set({
-                passwordHash: hash,
-                passwordSalt: salt,
-                mustChangePassword: true,
-            })
-            .where(eq(users.id, existing.id));
+        return;
     }
+
+    await db
+        .update(users)
+        .set({
+            passwordHash: hash,
+            passwordSalt: salt,
+            mustChangePassword: true,
+        })
+        .where(eq(users.id, existing.id));
+};
+
+async function seed() {
+    await upsertProjects();
+    await upsertServices();
+    await upsertDefaultAdmin();
 
     console.log('Database seeded successfully!');
 }
@@ -141,6 +145,7 @@ seed()
         console.error('Failed to seed database', error);
         process.exitCode = 1;
     })
-    .finally(() => {
-        sqlite.close();
+    .finally(async () => {
+        // Drain active connections when running as a one-off script.
+        await pool.end();
     });

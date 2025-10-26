@@ -1,13 +1,8 @@
 import {createId} from '@paralleldrive/cuid2';
 import {sql} from 'drizzle-orm';
-import {
-    integer,
-    sqliteTable,
-    text,
-    uniqueIndex,
-} from 'drizzle-orm/sqlite-core';
+import {boolean, integer, pgTable, text, timestamp, uniqueIndex,} from 'drizzle-orm/pg-core';
 
-export const projects = sqliteTable('projects', {
+export const projects = pgTable('projects', {
     id: text('id')
         .primaryKey()
         .$defaultFn(() => createId()),
@@ -25,17 +20,17 @@ export const projects = sqliteTable('projects', {
     techAr: text('techAr').notNull().default(''),
     liveUrl: text('liveUrl'),
     githubUrl: text('githubUrl'),
-    featured: integer('featured', {mode: 'boolean'}).notNull().default(false),
+    featured: boolean('featured').notNull().default(false),
     order: integer('order').notNull().default(0),
-    createdAt: text('createdAt')
+    createdAt: timestamp('createdAt', {withTimezone: true})
         .notNull()
         .default(sql`CURRENT_TIMESTAMP`),
-    updatedAt: text('updatedAt')
+    updatedAt: timestamp('updatedAt', {withTimezone: true})
         .notNull()
         .default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const blogPosts = sqliteTable(
+export const blogPosts = pgTable(
     'blog_posts',
     {
         id: text('id')
@@ -49,13 +44,13 @@ export const blogPosts = sqliteTable(
         excerptAr: text('excerptAr'),
         tags: text('tags').notNull().default(''),
         tagsAr: text('tagsAr').notNull().default(''),
-        published: integer('published', {mode: 'boolean'}).notNull().default(false),
-        featured: integer('featured', {mode: 'boolean'}).notNull().default(false),
+        published: boolean('published').notNull().default(false),
+        featured: boolean('featured').notNull().default(false),
         slug: text('slug').notNull(),
-        createdAt: text('createdAt')
+        createdAt: timestamp('createdAt', {withTimezone: true})
             .notNull()
             .default(sql`CURRENT_TIMESTAMP`),
-        updatedAt: text('updatedAt')
+        updatedAt: timestamp('updatedAt', {withTimezone: true})
             .notNull()
             .default(sql`CURRENT_TIMESTAMP`),
     },
@@ -64,7 +59,7 @@ export const blogPosts = sqliteTable(
     }),
 );
 
-export const services = sqliteTable('services', {
+export const services = pgTable('services', {
     id: text('id')
         .primaryKey()
         .$defaultFn(() => createId()),
@@ -75,17 +70,17 @@ export const services = sqliteTable('services', {
     icon: text('icon'),
     features: text('features').notNull().default(''),
     featuresAr: text('featuresAr').notNull().default(''),
-    featured: integer('featured', {mode: 'boolean'}).notNull().default(false),
+    featured: boolean('featured').notNull().default(false),
     order: integer('order').notNull().default(0),
-    createdAt: text('createdAt')
+    createdAt: timestamp('createdAt', {withTimezone: true})
         .notNull()
         .default(sql`CURRENT_TIMESTAMP`),
-    updatedAt: text('updatedAt')
+    updatedAt: timestamp('updatedAt', {withTimezone: true})
         .notNull()
         .default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const contacts = sqliteTable('contacts', {
+export const contacts = pgTable('contacts', {
     id: text('id')
         .primaryKey()
         .$defaultFn(() => createId()),
@@ -93,12 +88,12 @@ export const contacts = sqliteTable('contacts', {
     email: text('email'),
     whatsapp: text('whatsapp'),
     requirements: text('requirements').notNull(),
-    createdAt: text('createdAt')
+    createdAt: timestamp('createdAt', {withTimezone: true})
         .notNull()
         .default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const users = sqliteTable(
+export const users = pgTable(
     'users',
     {
         id: text('id')
@@ -109,10 +104,8 @@ export const users = sqliteTable(
         name: text('name'),
         passwordHash: text('passwordHash').notNull(),
         passwordSalt: text('passwordSalt').notNull(),
-        mustChangePassword: integer('mustChangePassword', {mode: 'boolean'})
-            .notNull()
-            .default(true),
-        isAdmin: integer('isAdmin', {mode: 'boolean'}).notNull().default(false),
+        mustChangePassword: boolean('mustChangePassword').notNull().default(true),
+        isAdmin: boolean('isAdmin').notNull().default(false),
     },
     (table) => ({
         usernameIdx: uniqueIndex('users_username_idx').on(table.username),

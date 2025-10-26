@@ -3,12 +3,15 @@ import {eq} from 'drizzle-orm';
 import type {AdminUser} from '@core/domain/user';
 import type {AdminUserRepository} from '@core/interfaces/repositories';
 
-import type {DrizzleDb} from '@/drizzle/db';
-import {db} from '@/drizzle/db';
-import {users} from '@/drizzle/schema';
+import type {DrizzleDb} from '@/app/lib/db';
+import {db} from '@/app/lib/db';
+import * as schema from '@/drizzle/schema';
+
+const {users} = schema;
 
 type UserRecord = typeof users.$inferSelect;
-type UserClient = DrizzleDb;
+type TransactionClient = Parameters<Parameters<DrizzleDb['transaction']>[0]>[0];
+type UserClient = DrizzleDb | TransactionClient;
 
 const mapAdminUser = (record: UserRecord): AdminUser => ({
     id: record.id,

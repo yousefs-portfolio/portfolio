@@ -98,15 +98,15 @@
 
 3. **Set up the database**
    ```bash
-   # Local SQLite (default)
    npm run db:push
    ```
-   > To target Postgres instead, set `DATABASE_URL=postgres://...` (or individual Cloud SQL env vars) before running the
+   > Provide Postgres credentials via `DATABASE_URL=postgres://...` for local development or the Cloud SQL environment
+   variables (`INSTANCE_CONNECTION_NAME`, `PGUSER`, `PGPASSWORD`, `PGDATABASE`, optionally `PGPORT`) before running the
    command.
 
 4. **Seed the database**
    ```bash
-   npm run db:seed
+   npm run db:seed:dev
    ```
 
 5. **Start the development server**
@@ -128,6 +128,10 @@
 | `npm start`           | Start production server                        |
 | `npm run lint`        | Run ESLint                                     |
 | `npm run typecheck`   | Run TypeScript in strict no-emit mode          |
+| `npm run db:push`     | Apply the current schema state to the database |
+| `npm run db:migrate`  | Execute generated SQL migrations               |
+| `npm run db:studio`   | Open Drizzle Studio                            |
+| `npm run db:seed:dev` | Seed the database with development data        |
 | `npm run test`        | Execute unit tests with Vitest                 |
 | `npm run format`      | Check formatting with Prettier                 |
 | `npm run format:fix`  | Format all files with Prettier                 |
@@ -185,9 +189,9 @@ portfolio/
 ```ts
 import { createId } from '@paralleldrive/cuid2';
 import { sql } from 'drizzle-orm';
-import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { boolean, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 
-export const contacts = sqliteTable('contacts', {
+export const contacts = pgTable('contacts', {
   id: text('id')
     .primaryKey()
     .$defaultFn(() => createId()),
@@ -195,12 +199,12 @@ export const contacts = sqliteTable('contacts', {
   email: text('email'),
   whatsapp: text('whatsapp'),
   requirements: text('requirements').notNull(),
-  createdAt: text('createdAt')
+  createdAt: timestamp('createdAt', { withTimezone: true })
     .notNull()
     .default(sql`CURRENT_TIMESTAMP`),
 });
 
-export const users = sqliteTable('users', {
+export const users = pgTable('users', {
   id: text('id')
     .primaryKey()
     .$defaultFn(() => createId()),
@@ -209,10 +213,10 @@ export const users = sqliteTable('users', {
   name: text('name'),
   passwordHash: text('passwordHash').notNull(),
   passwordSalt: text('passwordSalt').notNull(),
-  mustChangePassword: integer('mustChangePassword', { mode: 'boolean' })
+  mustChangePassword: boolean('mustChangePassword')
     .notNull()
     .default(true),
-  isAdmin: integer('isAdmin', { mode: 'boolean' }).notNull().default(false),
+  isAdmin: boolean('isAdmin').notNull().default(false),
 });
 ```
 
@@ -240,83 +244,9 @@ export const users = sqliteTable('users', {
 
 ---
 
-## 🌍 Deployment
-
-### Vercel (Recommended)
-
-1. **Push to GitHub**
-   ```bash
-   git add .
-   git commit -m "Ready for deployment"
-   git push origin main
-   ```
-
-2. **Import to Vercel**
-   - Visit [vercel.com](https://vercel.com)
-   - Import your GitHub repository
-   - Configure environment variables if needed
-   - Deploy!
-
-### Environment Variables
-
-Create a `.env.local` file for local development:
-
-```env
-# Database
-DATABASE_URL="file:./drizzle/dev.db"
-
-# Admin (for production)
-ADMIN_PASSWORD="your-secure-password"
-
-# Optional: Analytics
-NEXT_PUBLIC_GA_ID="G-XXXXXXXXXX"
-```
-
-### Production Database
-
-For production, consider using:
-- **PostgreSQL** (Recommended)
-- **MySQL**
-- **PlanetScale**
-- **Supabase**
-
-Update your `DATABASE_URL` accordingly:
-```env
-DATABASE_URL="postgresql://user:password@host:port/database"
-```
-
----
-
-## 🔮 Future Enhancements
-
-### Phase 1: Content Management
-- [ ] Integrate Contentful/Sanity.io for blog management
-- [ ] Add markdown editor for admin dashboard
-- [ ] Implement draft/preview functionality
-
-### Phase 2: Enhanced Interactivity
-- [ ] Add WebGL post-processing effects
-- [ ] Implement page transitions with Framer Motion
-- [ ] Create interactive project showcases
-
-### Phase 3: Performance & SEO
-- [ ] Implement ISR (Incremental Static Regeneration)
-- [ ] Add structured data for SEO
-- [ ] Optimize Core Web Vitals
-
-### Phase 4: Features
-- [ ] Add newsletter subscription
-- [ ] Implement comment system for blog
-- [ ] Create RSS feed
-- [ ] Add dark/light theme toggle
-
----
-
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
-
-
 
