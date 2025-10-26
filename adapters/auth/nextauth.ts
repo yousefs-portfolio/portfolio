@@ -8,6 +8,7 @@ import {drizzleAdminUserRepository} from '../db/drizzle/admin-user.repository';
 import { passwordHasher } from '../crypto/node/password-hasher';
 
 export const authOptions: AuthOptions = {
+  secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
   pages: {
     signIn: '/admin/login',
   },
