@@ -1,11 +1,18 @@
 import {eq} from 'drizzle-orm';
+import {drizzle} from 'drizzle-orm/node-postgres';
 
 import {passwordHasher} from '@adapters/crypto/node/password-hasher';
-import {getDb, getPool} from '@/app/lib/db';
-import {projects, services, users} from '@/drizzle/schema';
+import {createCliPool} from './pool';
+import * as schema from '@/drizzle/schema';
+
+const pool = createCliPool();
+const db = drizzle(pool, {
+    schema,
+});
+
+const {projects, services, users} = schema;
 
 const upsertProjects = async () => {
-    const db = await getDb();
     await db
         .insert(projects)
         .values({
@@ -59,7 +66,6 @@ const upsertProjects = async () => {
 };
 
 const upsertServices = async () => {
-    const db = await getDb();
     await db
         .insert(services)
         .values({
@@ -103,7 +109,6 @@ const upsertDefaultAdmin = async () => {
 
     const {hash, salt} = await passwordHasher.hash(defaultPassword);
 
-    const db = await getDb();
     const existingUser = await db
         .select()
         .from(users)
@@ -150,6 +155,5 @@ seed()
     })
     .finally(async () => {
         // Drain active connections when running as a one-off script.
-        const pool = await getPool();
         await pool.end();
     });
