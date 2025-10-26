@@ -32,7 +32,7 @@ const createPool = async (): Promise<Pool> => {
         try {
             const url = new URL(connectionString);
             disableSsl = url.hostname === 'localhost' || url.hostname === '127.0.0.1';
-        } catch (error) {
+        } catch {
             disableSsl = true;
         }
 
