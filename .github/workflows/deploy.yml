@@ -48,7 +48,7 @@ jobs:
             echo "PGDATABASE=app_dev" >> $GITHUB_OUTPUT
             echo "PGPASSWORD=${{ secrets.PG_PASSWORD_DEV }}" >> $GITHUB_OUTPUT
             echo "NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET_DEV }}" >> $GITHUB_OUTPUT
-            echo "SERVICE_ACCOUNT=${{ secrets.RUN_SERVICE_ACCOUNT_DEV }}" >> $GITHUB_OUTPUT
+            echo "SERVICE_ACCOUNT=${{ secrets.RUN_SERVICE_ACCOUNT_DEV || secrets.GCP_SA_EMAIL }}" >> $GITHUB_OUTPUT
           elif [ "$ref" = "uat" ]; then
             echo "ENV=uat" >> $GITHUB_OUTPUT
             echo "SERVICE=next-uat" >> $GITHUB_OUTPUT
@@ -56,7 +56,7 @@ jobs:
             echo "PGDATABASE=app_uat" >> $GITHUB_OUTPUT
             echo "PGPASSWORD=${{ secrets.PG_PASSWORD_UAT }}" >> $GITHUB_OUTPUT
             echo "NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET_UAT }}" >> $GITHUB_OUTPUT
-            echo "SERVICE_ACCOUNT=${{ secrets.RUN_SERVICE_ACCOUNT_UAT }}" >> $GITHUB_OUTPUT
+            echo "SERVICE_ACCOUNT=${{ secrets.RUN_SERVICE_ACCOUNT_UAT || secrets.GCP_SA_EMAIL }}" >> $GITHUB_OUTPUT
           else
             echo "ENV=prod" >> $GITHUB_OUTPUT
             echo "SERVICE=next-prod" >> $GITHUB_OUTPUT
@@ -64,7 +64,7 @@ jobs:
             echo "PGDATABASE=app_prod" >> $GITHUB_OUTPUT
             echo "PGPASSWORD=${{ secrets.PG_PASSWORD_PROD }}" >> $GITHUB_OUTPUT
             echo "NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET_PROD }}" >> $GITHUB_OUTPUT
-            echo "SERVICE_ACCOUNT=${{ secrets.RUN_SERVICE_ACCOUNT_PROD }}" >> $GITHUB_OUTPUT
+            echo "SERVICE_ACCOUNT=${{ secrets.RUN_SERVICE_ACCOUNT_PROD || secrets.GCP_SA_EMAIL }}" >> $GITHUB_OUTPUT
           fi
 
       - name: Build & push image
