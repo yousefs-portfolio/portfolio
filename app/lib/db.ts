@@ -1,5 +1,3 @@
-import 'server-only';
-
 import {Connector} from '@google-cloud/cloud-sql-connector';
 import type {NodePgDatabase} from 'drizzle-orm/node-postgres';
 import {drizzle} from 'drizzle-orm/node-postgres';
