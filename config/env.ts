@@ -1,5 +1,9 @@
 import {z} from 'zod';
 
+const shouldValidateDbEnv =
+    process.env.SKIP_ENV_VALIDATION !== '1' &&
+    process.env.SKIP_ENV_VALIDATION !== 'true';
+
 const EnvSchema = z
     .object({
         NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
@@ -22,6 +26,10 @@ const EnvSchema = z
         NEXTAUTH_URL: z.string().url().optional(),
     })
     .superRefine((value, ctx) => {
+        if (!shouldValidateDbEnv) {
+            return;
+        }
+
         if (!value.DATABASE_URL) {
             if (!value.INSTANCE_CONNECTION_NAME) {
                 ctx.addIssue({
