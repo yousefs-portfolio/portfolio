@@ -36,9 +36,11 @@ const createPool = async (): Promise<Pool> => {
         return new Pool({
             connectionString: env.DATABASE_URL,
             ssl: requiresSsl
-                ? {
-                    rejectUnauthorized: false,
-                }
+                ? skipDb
+                    ? false
+                    : {
+                        rejectUnauthorized: false,
+                    }
                 : undefined,
         });
     }
