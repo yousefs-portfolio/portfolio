@@ -1,5 +1,3 @@
-'use server';
-
 import 'server-only';
 
 import {Connector} from '@google-cloud/cloud-sql-connector';
