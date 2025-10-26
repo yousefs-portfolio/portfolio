@@ -20,8 +20,18 @@ type GlobalDrizzle = typeof globalThis & {
 const globalForDb = globalThis as GlobalDrizzle;
 
 const shouldCache = env.NODE_ENV !== 'production';
+const skipDb = process.env.SKIP_DB === '1' || process.env.SKIP_DB === 'true';
 
 const createPool = async (): Promise<Pool> => {
+    if (skipDb) {
+        return new Pool({
+            connectionString:
+                env.DATABASE_URL ??
+                'postgresql://placeholder:placeholder@localhost:5432/placeholder',
+            max: 0,
+        });
+    }
+
     if (env.DATABASE_URL) {
         const requiresSsl =
             env.DATABASE_URL.startsWith('postgres://') ||
