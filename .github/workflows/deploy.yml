@@ -87,24 +87,21 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Install deps, sync schema, and seed
+      - name: Install deps & run migrations
         env:
-          PGPASSWORD: ${{ steps.envmap.outputs.PGPASSWORD }}
           PGUSER: ${{ steps.envmap.outputs.PGUSER }}
+          PGPASSWORD: ${{ steps.envmap.outputs.PGPASSWORD }}
           PGDATABASE: ${{ steps.envmap.outputs.PGDATABASE }}
-          PGHOST: 127.0.0.1
-          PGPORT: 5432
           PGSSLMODE: disable
-          DATABASE_URL: postgresql://${{ steps.envmap.outputs.PGUSER }}:${{ steps.envmap.outputs.PGPASSWORD }}@127.0.0.1:5432/${{ steps.envmap.outputs.PGDATABASE }}
+          DATABASE_URL: postgresql://${{ steps.envmap.outputs.PGUSER }}:${{ steps.envmap.outputs.PGPASSWORD }}@127.0.0.1:5432/${{ steps.envmap.outputs.PGDATABASE }}?sslmode=disable
         run: |
           corepack enable || true
-          # install
           if [ -f pnpm-lock.yaml ]; then corepack prepare pnpm@latest --activate; pnpm i --frozen-lockfile || pnpm i; \
           elif [ -f yarn.lock ]; then yarn --frozen-lockfile; \
           else npm ci || npm i; fi
           npx drizzle-kit migrate
-          # optional seed (if you want)
-          # npx tsx scripts/db/seed-pg.ts
+          # optional seed on non-prod:
+          # if [ "${GITHUB_REF##*/}" != "main" ]; then npx tsx scripts/db/seed-pg.ts; fi
 
       # 3) Compute service URL & deploy (sets NEXTAUTH_URL + SECRET)
       - name: Get Project Number
