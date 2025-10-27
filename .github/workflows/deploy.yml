@@ -93,6 +93,7 @@ jobs:
           PGPASSWORD: ${{ steps.envmap.outputs.PGPASSWORD }}
           PGDATABASE: ${{ steps.envmap.outputs.PGDATABASE }}
           PGSSLMODE: disable
+          PGOPTIONS: -c search_path=app,public
           DATABASE_URL: postgresql://${{ steps.envmap.outputs.PGUSER }}:${{ steps.envmap.outputs.PGPASSWORD }}@127.0.0.1:5432/${{ steps.envmap.outputs.PGDATABASE }}?sslmode=disable
         run: |
           corepack enable || true
