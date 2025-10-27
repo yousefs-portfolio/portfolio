@@ -127,11 +127,12 @@ jobs:
             --set-env-vars "NODE_ENV=production,INSTANCE_CONNECTION_NAME=${{ env.INSTANCE_CONNECTION_NAME }},PGUSER=${{ steps.envmap.outputs.PGUSER }},PGPASSWORD=${{ steps.envmap.outputs.PGPASSWORD }},PGDATABASE=${{ steps.envmap.outputs.PGDATABASE }}" \
             --set-secrets "AUTH_SECRET=nextauth-secret-${{ steps.envmap.outputs.PATH || steps.envmap.outputs.ENV }}:latest,NEXTAUTH_SECRET=nextauth-secret-${{ steps.envmap.outputs.PATH || steps.envmap.outputs.ENV }}:latest"
 
-          # 2) Read the real service URL and set NEXTAUTH_URL in a separate update
           SERVICE_URL="$(gcloud run services describe "$SERVICE" --region "$REGION" --format='value(status.url)')"
 
           gcloud run services update "$SERVICE" \
             --region "$REGION" \
-            --set-env-vars "NEXTAUTH_URL=${SERVICE_URL},AUTH_URL=${SERVICE_URL}"
+            --update-env-vars "AUTH_URL=${SERVICE_URL},NEXTAUTH_URL=${SERVICE_URL}"
+
+          gcloud run services update-traffic "$SERVICE" --region "$REGION" --to=100
 
           echo "Deployed $SERVICE at ${SERVICE_URL}"
