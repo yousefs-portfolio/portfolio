@@ -133,6 +133,6 @@ jobs:
             --region "$REGION" \
             --update-env-vars "AUTH_URL=${SERVICE_URL},NEXTAUTH_URL=${SERVICE_URL}"
 
-          gcloud run services update-traffic "$SERVICE" --region "$REGION" --to-latest-revision=100
+          gcloud run services update-traffic "$SERVICE" --region "$REGION" --to-revisions=latest=100
 
           echo "Deployed $SERVICE at ${SERVICE_URL}"
