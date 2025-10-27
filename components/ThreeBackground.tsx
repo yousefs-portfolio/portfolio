@@ -194,87 +194,126 @@ export default function ThreeBackground() {
       // Initial camera position
       camera.position.set(0, 0, 10)  // Start in front of particles
 
-      // Wait for DOM to be ready, then create unified timeline
+          // Wait for DOM to be ready, then wire scroll triggers
       setTimeout(() => {
-        // Create main timeline with scroll trigger
-        const mainTimeline = gsap.timeline({
-          scrollTrigger: {
-            trigger: 'main',
-            start: 'top top',
-            end: 'bottom bottom',
-            scrub: 1,
-            onUpdate: function (self) {
-              const progress = self.progress
+          const letterMaterials = letterMeshes.map((mesh) => mesh.material as MeshBasicMaterial)
 
-              // Progress-based visibility management
-              if (progress < 0.3) {
-                // Hero to Seen section - Particles visible
-                seenGroup.visible = true
-                arabicLettersGroup.visible = false
-                hearthshireGroup.visible = false
-                particlesMaterial.opacity = 1
-              } else if (progress >= 0.3 && progress < 0.6) {
-                // Summon section - Transition to Arabic letters
-                seenGroup.visible = true
-                arabicLettersGroup.visible = true
-                hearthshireGroup.visible = false
+          type Phase = 'particles' | 'letters' | 'voxels'
+          let currentPhase: Phase = 'particles'
 
-                const transitionProgress = (progress - 0.3) / 0.3
-                particlesMaterial.opacity = Math.max(0, 1 - transitionProgress * 1.5)
-
-                letterMeshes.forEach(mesh => {
-                    (mesh.material as MeshBasicMaterial).opacity = 0.6 * transitionProgress
-                })
-
-                if (transitionProgress > 0.9) {
-                  seenGroup.visible = false
-                }
-              } else if (progress >= 0.6 && progress < 0.85) {
-                // Hearthshire section - Transition to voxels
-                seenGroup.visible = false
-                arabicLettersGroup.visible = true
-                hearthshireGroup.visible = true
-
-                const transitionProgress = (progress - 0.6) / 0.25
-                letterMeshes.forEach(mesh => {
-                    (mesh.material as MeshBasicMaterial).opacity = Math.max(0.1, 0.6 * (1 - transitionProgress))
-                })
-
-                if (transitionProgress > 0.9) {
-                  arabicLettersGroup.visible = false
-                }
-              } else {
-                // Contact section - Only voxels
-                seenGroup.visible = false
-                arabicLettersGroup.visible = false
-                hearthshireGroup.visible = true
-              }
-            }
+          const transitionDuration = 0.8
+          const fadeLetters = (opacity: number) => {
+              gsap.to(letterMaterials, {
+                  opacity,
+                  duration: transitionDuration,
+                  ease: 'power1.out',
+                  overwrite: true,
+              })
           }
-        })
 
-        // Animate camera and groups through the timeline
-        mainTimeline
-          // Hero phase (0-30%)
-          .to(camera.position, {z: 0, duration: 0.3, ease: 'power1.inOut'}, 0)
+          const setPhase = (phase: Phase) => {
+              if (phase === currentPhase) return
+              currentPhase = phase
 
-          // Summon phase (30-60%) - Show Arabic letters
-          .to(camera.position, {z: -25, duration: 0.3, ease: 'power1.inOut'}, 0.3)
-          .to(camera.rotation, {y: Math.PI * 0.1, duration: 0.3, ease: 'power1.inOut'}, 0.3)
-          .to(arabicLettersGroup.position, {z: -5, duration: 0.3, ease: 'power1.inOut'}, 0.3)
-          .to(arabicLettersGroup.rotation, {y: Math.PI * 0.3, duration: 0.3, ease: 'power1.inOut'}, 0.3)
+              switch (phase) {
+                  case 'particles': {
+                      seenGroup.visible = true
+                      arabicLettersGroup.visible = false
+                      hearthshireGroup.visible = false
+                      gsap.to(particlesMaterial, {
+                          opacity: 1,
+                          duration: transitionDuration,
+                          ease: 'power1.out',
+                          overwrite: true,
+                      })
+                      fadeLetters(0)
+                      gsap.to(arabicLettersGroup.position, {
+                          z: -25,
+                          duration: transitionDuration,
+                          ease: 'power2.out',
+                          overwrite: true,
+                      })
+                      gsap.to(camera.position, {
+                          z: 10,
+                          duration: transitionDuration,
+                          ease: 'power2.out',
+                          overwrite: true,
+                      })
+                      break
+                  }
+                  case 'letters': {
+                      seenGroup.visible = false
+                      arabicLettersGroup.visible = true
+                      hearthshireGroup.visible = false
+                      gsap.to(particlesMaterial, {
+                          opacity: 0,
+                          duration: transitionDuration,
+                          ease: 'power1.inOut',
+                          overwrite: true,
+                      })
+                      fadeLetters(0.6)
+                      gsap.to(arabicLettersGroup.position, {
+                          z: -12,
+                          duration: transitionDuration,
+                          ease: 'power2.out',
+                          overwrite: true,
+                      })
+                      gsap.to(camera.position, {
+                          z: -18,
+                          duration: transitionDuration,
+                          ease: 'power2.out',
+                          overwrite: true,
+                      })
+                      break
+                  }
+                  case 'voxels': {
+                      seenGroup.visible = false
+                      arabicLettersGroup.visible = false
+                      hearthshireGroup.visible = true
+                      fadeLetters(0)
+                      gsap.to(camera.position, {
+                          z: -32,
+                          duration: transitionDuration,
+                          ease: 'power2.out',
+                          overwrite: true,
+                      })
+                      gsap.to(hearthshireGroup.position, {
+                          z: -34,
+                          duration: transitionDuration,
+                          ease: 'power2.out',
+                          overwrite: true,
+                      })
+                      break
+                  }
+              }
+          }
 
-          // Hearthshire phase (60-85%) - Show voxels up close
-          .to(camera.position, {z: -32, duration: 0.25, ease: 'power1.inOut'}, 0.6)
-          .to(camera.rotation, {y: 0, duration: 0.25, ease: 'power1.inOut'}, 0.6)
-          .to(arabicLettersGroup.position, {z: 20, duration: 0.25, ease: 'power1.inOut'}, 0.6)
-          .to(hearthshireGroup.position, {z: -34, duration: 0.25, ease: 'power1.inOut'}, 0.6)
+          // Ensure initial phase
+          setPhase('particles')
 
-          // Contact phase (85-100%)
-          .to(camera.position, {z: -38, x: 2, duration: 0.2, ease: 'power1.inOut'}, 0.85)
-          .to(hearthshireGroup.position, {z: -40, duration: 0.2, ease: 'power1.inOut'}, 0.85)
-          .to(camera.position, {x: 0, duration: 0.15, ease: 'power1.inOut'}, 0.9)
-      }, 100)  // Small delay to ensure DOM is ready
+          ScrollTrigger.create({
+              trigger: '#hero',
+              start: 'top top',
+              end: 'bottom top',
+              onEnter: () => setPhase('particles'),
+              onEnterBack: () => setPhase('particles'),
+              onLeave: () => setPhase('letters'),
+          })
+
+          ScrollTrigger.create({
+              trigger: '#projects-anchor',
+              start: 'top center',
+              onEnter: () => setPhase('letters'),
+              onEnterBack: () => setPhase('particles'),
+          })
+
+          ScrollTrigger.create({
+              trigger: '#contact',
+              start: 'top center',
+              onEnter: () => setPhase('voxels'),
+              onEnterBack: () => setPhase('letters'),
+          })
+      }, 100)
 
       // Mouse Interaction & Render Loop
       const cursor = { x: 0, y: 0 }

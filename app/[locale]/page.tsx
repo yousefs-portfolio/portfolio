@@ -115,44 +115,6 @@ export default function Home() {
     }
   }, [loading, projects])
 
-  const getLayerColor = (layer: string) => {
-    switch (layer) {
-      case 'LAYER 1': return 'text-blue-400'
-      case 'LAYER 2': return 'text-purple-400'
-      case 'LAYER 3': return 'text-red-400'
-      default: return 'text-gray-400'
-    }
-  }
-
-  // Map project IDs to translation keys
-  const getProjectTranslation = (projectId: string, field: 'title' | 'description') => {
-    const projectMap: Record<string, string> = {
-      'seen-project': 'seen',
-      'summon-project': 'summon',
-      'hearthshire-project': 'hearthshire'
-    }
-
-    const projectKey = projectMap[projectId]
-    if (projectKey) {
-      return t(`projects.${projectKey}.${field}`)
-    }
-    return null
-  }
-
-  const getLayerTranslation = (layer: string, field: 'layer' | 'layerName') => {
-    const layerMap: Record<string, string> = {
-      'LAYER 1': 'layer1',
-      'LAYER 2': 'layer2',
-      'LAYER 3': 'layer3'
-    }
-
-    const layerKey = layerMap[layer]
-    if (layerKey) {
-      return field === 'layer' ? t(`projects.${layerKey}`) : t(`projects.${layerKey}Name`)
-    }
-    return layer
-  }
-
   return (
     <>
       <ThreeBackground />
@@ -201,6 +163,9 @@ export default function Home() {
             </div>
           </ContentSection>
         )}
+
+        {/* Anchor for Three.js Arabic letters phase */}
+        <div id="projects-anchor" className="h-0"/>
         
         {/* Dynamic Project Sections */}
         {loading ? (
@@ -210,14 +175,11 @@ export default function Home() {
         ) : filteredProjects.length > 0 ? (
           filteredProjects.map((project) => (
             <ContentSection key={project.id} id={project.id.replace('-project', '')}>
-              <h3 className={`text-sm font-semibold mb-2 tracking-widest ${getLayerColor(project.layer)}`}>
-                {getLayerTranslation(project.layer, 'layer')}: {getLayerTranslation(project.layer, 'layerName')}
-              </h3>
               <h4 className="text-5xl md:text-7xl font-bold mb-4">
-                {getProjectTranslation(project.id, 'title') || project.title}
+                {project.title}
               </h4>
               <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-                {getProjectTranslation(project.id, 'description') || project.description}
+                {project.description}
               </p>
             </ContentSection>
           ))
