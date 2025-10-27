@@ -41,7 +41,9 @@ export default function Home() {
         const response = await fetch('/api/projects', { cache: 'no-store' })
         if (!response.ok) throw new Error(`HTTP ${response.status}`)
         const data: Project[] = await response.json()
-        setProjects(data.filter((project: Project) => project.featured))
+          const sorted = [...data].sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+          const featured = sorted.filter((project) => project.featured)
+          setProjects(featured.length > 0 ? featured : sorted)
       } catch (error) {
         console.error('Failed to fetch projects:', error)
       } finally {
