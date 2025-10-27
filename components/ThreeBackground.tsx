@@ -200,89 +200,66 @@ export default function ThreeBackground() {
 
           type Phase = 'particles' | 'letters' | 'voxels'
           let currentPhase: Phase = 'particles'
+          let currentTransition: gsap.core.Timeline | null = null
 
-          const transitionDuration = 0.8
-          const fadeLetters = (opacity: number) => {
-              gsap.to(letterMaterials, {
-                  opacity,
-                  duration: transitionDuration,
-                  ease: 'power1.out',
-                  overwrite: true,
-              })
-          }
-
+          const transitionDuration = 1.2
           const setPhase = (phase: Phase) => {
               if (phase === currentPhase) return
               currentPhase = phase
 
+              currentTransition?.kill()
+              currentTransition = gsap.timeline({defaults: {duration: transitionDuration, ease: 'power2.inOut'}})
+
               switch (phase) {
                   case 'particles': {
                       seenGroup.visible = true
-                      arabicLettersGroup.visible = false
-                      hearthshireGroup.visible = false
-                      gsap.to(particlesMaterial, {
-                          opacity: 1,
-                          duration: transitionDuration,
-                          ease: 'power1.out',
-                          overwrite: true,
-                      })
-                      fadeLetters(0)
-                      gsap.to(arabicLettersGroup.position, {
-                          z: -25,
-                          duration: transitionDuration,
-                          ease: 'power2.out',
-                          overwrite: true,
-                      })
-                      gsap.to(camera.position, {
-                          z: 10,
-                          duration: transitionDuration,
-                          ease: 'power2.out',
-                          overwrite: true,
-                      })
+                      arabicLettersGroup.visible = true
+                      hearthshireGroup.visible = true
+
+                      currentTransition
+                          .to(particlesMaterial, {opacity: 1}, 0)
+                          .to(letterMaterials, {opacity: 0}, 0)
+                          .to(arabicLettersGroup.position, {z: -25}, 0)
+                          .to(hearthshireGroup.position, {z: -40}, 0)
+                          .to(camera.position, {z: 10}, 0)
+                          .call(() => {
+                              arabicLettersGroup.visible = false
+                              hearthshireGroup.visible = false
+                              particlesMaterial.opacity = 1
+                          }, [], transitionDuration - 0.2)
                       break
                   }
                   case 'letters': {
-                      seenGroup.visible = false
+                      seenGroup.visible = true
                       arabicLettersGroup.visible = true
-                      hearthshireGroup.visible = false
-                      gsap.to(particlesMaterial, {
-                          opacity: 0,
-                          duration: transitionDuration,
-                          ease: 'power1.inOut',
-                          overwrite: true,
-                      })
-                      fadeLetters(0.6)
-                      gsap.to(arabicLettersGroup.position, {
-                          z: -12,
-                          duration: transitionDuration,
-                          ease: 'power2.out',
-                          overwrite: true,
-                      })
-                      gsap.to(camera.position, {
-                          z: -18,
-                          duration: transitionDuration,
-                          ease: 'power2.out',
-                          overwrite: true,
-                      })
+                      hearthshireGroup.visible = true
+
+                      currentTransition
+                          .to(particlesMaterial, {opacity: 0}, 0)
+                          .to(letterMaterials, {opacity: 0.6}, 0)
+                          .to(arabicLettersGroup.position, {z: -12}, 0)
+                          .to(camera.position, {z: -18}, 0)
+                          .to(camera.rotation, {y: Math.PI * 0.1}, 0)
+                          .call(() => {
+                              seenGroup.visible = false
+                              hearthshireGroup.visible = false
+                          }, [], transitionDuration - 0.2)
                       break
                   }
                   case 'voxels': {
                       seenGroup.visible = false
-                      arabicLettersGroup.visible = false
+                      arabicLettersGroup.visible = true
                       hearthshireGroup.visible = true
-                      fadeLetters(0)
-                      gsap.to(camera.position, {
-                          z: -32,
-                          duration: transitionDuration,
-                          ease: 'power2.out',
-                          overwrite: true,
-                      })
-                      gsap.to(hearthshireGroup.position, {
-                          z: -34,
-                          duration: transitionDuration,
-                          ease: 'power2.out',
-                          overwrite: true,
-                      })
+
+                      currentTransition
+                          .to(letterMaterials, {opacity: 0}, 0)
+                          .to(arabicLettersGroup.position, {z: 10}, 0)
+                          .to(camera.position, {z: -34}, 0)
+                          .to(camera.rotation, {y: 0}, 0)
+                          .to(hearthshireGroup.position, {z: -40}, 0)
+                          .call(() => {
+                              arabicLettersGroup.visible = false
+                          }, [], transitionDuration - 0.2)
                       break
                   }
               }
@@ -294,7 +271,7 @@ export default function ThreeBackground() {
           ScrollTrigger.create({
               trigger: '#hero',
               start: 'top top',
-              end: 'bottom top',
+              end: 'bottom 30%',
               onEnter: () => setPhase('particles'),
               onEnterBack: () => setPhase('particles'),
               onLeave: () => setPhase('letters'),
@@ -302,14 +279,16 @@ export default function ThreeBackground() {
 
           ScrollTrigger.create({
               trigger: '#projects-anchor',
-              start: 'top center',
+              start: 'top bottom',
+              end: 'bottom top',
               onEnter: () => setPhase('letters'),
               onEnterBack: () => setPhase('particles'),
           })
 
           ScrollTrigger.create({
               trigger: '#contact',
-              start: 'top center',
+              start: 'top 70%',
+              end: 'bottom top',
               onEnter: () => setPhase('voxels'),
               onEnterBack: () => setPhase('letters'),
           })
