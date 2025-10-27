@@ -36,10 +36,16 @@ const createPool = async (): Promise<Pool> => {
             disableSsl = true;
         }
 
-        return new Pool({
+        const pool = new Pool({
             connectionString,
             ssl: disableSsl ? false : {rejectUnauthorized: false},
         });
+
+        pool.on('connect', async (client) => {
+            await client.query('set search_path to app, public');
+        });
+
+        return pool;
     }
 
     const {
@@ -77,6 +83,10 @@ const createPool = async (): Promise<Pool> => {
         connector.close();
         return undefined;
     };
+
+    pool.on('connect', async (client) => {
+        await client.query('set search_path to app, public');
+    });
 
     return pool;
 };
