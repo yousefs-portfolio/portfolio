@@ -133,7 +133,7 @@ export default function Home() {
         
         {/* Project Filters */}
         {!loading && projects.length > 0 && availableCategories.length > 0 && (
-          <ContentSection id="project-filters" className="pt-0">
+            <ContentSection id="project-filters" className="pt-0 compact">
             <div className="flex flex-wrap justify-center gap-3">
               <button
                 type="button"
@@ -174,7 +174,7 @@ export default function Home() {
               <ContentSection
                   key={project.id}
                   id={project.id.replace('-project', '')}
-                  className="project-section"
+                  className="project-section compact"
               >
               <h4 className="text-5xl md:text-7xl font-bold mb-4">
                 {project.title}

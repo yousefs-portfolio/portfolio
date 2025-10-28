@@ -193,6 +193,19 @@ code, pre, .font-mono {
     align-items: center;
     padding: 2rem;
 }
+
+.content-section.compact {
+    min-height: auto;
+    padding: 2rem 1.5rem;
+}
+
+.content-section.project-section {
+    align-items: flex-start;
+}
+
+.content-section.project-section .content-box {
+    margin-top: 4rem;
+}
 .content-box {
     max-width: 48rem;
     text-align: center;
