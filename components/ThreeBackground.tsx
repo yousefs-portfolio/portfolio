@@ -202,7 +202,7 @@ export default function ThreeBackground() {
           let currentPhase: Phase = 'particles'
           let currentTransition: gsap.core.Timeline | null = null
 
-          const transitionDuration = 1.2
+          const transitionDuration = 0.9
           const setPhase = (phase: Phase) => {
               if (phase === currentPhase) return
               currentPhase = phase
@@ -233,6 +233,10 @@ export default function ThreeBackground() {
                       seenGroup.visible = true
                       arabicLettersGroup.visible = true
                       hearthshireGroup.visible = true
+
+                      letterMaterials.forEach((material) => {
+                          material.opacity = Math.max(material.opacity, 0.15)
+                      })
 
                       currentTransition
                           .to(particlesMaterial, {opacity: 0}, 0)
@@ -277,17 +281,23 @@ export default function ThreeBackground() {
               onLeave: () => setPhase('letters'),
           })
 
+          const attachProjectTrigger = () => {
           const projectsTrigger = document.querySelector<HTMLElement>('.project-section')
-          if (projectsTrigger) {
+              if (!projectsTrigger) {
+                  requestAnimationFrame(attachProjectTrigger)
+                  return
+              }
+
           ScrollTrigger.create({
               trigger: projectsTrigger,
-              start: 'top 80%',
+              start: 'top 85%',
               end: 'bottom 40%',
               onEnter: () => setPhase('letters'),
               onEnterBack: () => setPhase('letters'),
               onLeaveBack: () => setPhase('particles'),
           })
           }
+          attachProjectTrigger()
 
           ScrollTrigger.create({
               trigger: '#contact',
