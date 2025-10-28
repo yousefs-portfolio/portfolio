@@ -290,8 +290,8 @@ export default function ThreeBackground() {
 
           ScrollTrigger.create({
               trigger: projectsTrigger,
-              start: 'top 85%',
-              end: 'bottom 40%',
+              start: 'top bottom',
+              end: 'top 60%',
               onEnter: () => setPhase('letters'),
               onEnterBack: () => setPhase('letters'),
               onLeaveBack: () => setPhase('particles'),
