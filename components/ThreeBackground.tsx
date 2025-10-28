@@ -277,17 +277,21 @@ export default function ThreeBackground() {
               onLeave: () => setPhase('letters'),
           })
 
+          const projectsTrigger = document.querySelector<HTMLElement>('.project-section')
+          if (projectsTrigger) {
           ScrollTrigger.create({
-              trigger: '#projects-anchor',
-              start: 'top bottom',
-              end: 'bottom top',
+              trigger: projectsTrigger,
+              start: 'top 80%',
+              end: 'bottom 40%',
               onEnter: () => setPhase('letters'),
-              onEnterBack: () => setPhase('particles'),
+              onEnterBack: () => setPhase('letters'),
+              onLeaveBack: () => setPhase('particles'),
           })
+          }
 
           ScrollTrigger.create({
               trigger: '#contact',
-              start: 'top 70%',
+              start: 'top 75%',
               end: 'bottom top',
               onEnter: () => setPhase('voxels'),
               onEnterBack: () => setPhase('letters'),

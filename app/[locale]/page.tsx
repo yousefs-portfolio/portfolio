@@ -164,9 +164,6 @@ export default function Home() {
           </ContentSection>
         )}
 
-        {/* Anchor for Three.js Arabic letters phase */}
-        <div id="projects-anchor" className="h-0"/>
-        
         {/* Dynamic Project Sections */}
         {loading ? (
           <ContentSection id="loading">
@@ -174,7 +171,11 @@ export default function Home() {
           </ContentSection>
         ) : filteredProjects.length > 0 ? (
           filteredProjects.map((project) => (
-            <ContentSection key={project.id} id={project.id.replace('-project', '')}>
+              <ContentSection
+                  key={project.id}
+                  id={project.id.replace('-project', '')}
+                  className="project-section"
+              >
               <h4 className="text-5xl md:text-7xl font-bold mb-4">
                 {project.title}
               </h4>
